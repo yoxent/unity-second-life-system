@@ -1,0 +1,38 @@
+---
+description: Use when implementing a feature or other substantial change. Understand, plan, implement, verify, report. Large work stops after the plan until the user agrees.
+alwaysApply: false
+---
+
+# Feature implementation
+
+Use this for a feature or a change that crosses a system boundary. A one-line fix with an obvious site does not need the full pass.
+
+## Understand
+
+Read E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\PROJECT_CONTEXT.md. Read E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\GDD.md when the task affects gameplay. Read the Notion Story Bible and Systems & Mechanics Reference when the task affects gameplay or world rules. Read E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\TECHNICAL_DESIGN.md when it affects a boundary. Read the Notion Development Tools page when it affects the toolchain. Read the feature spec in E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\FEATURE_SPECS\ when that feature has one. Inspect the existing implementation before proposing a new type.
+
+Confirmed Notion text is design intent. Provisional and open text is not a requirement. If a missing decision would change the result, post it on the Notion AI to AI page and stop. Do not wait in the same session for the answer, and do not invent it.
+
+## Plan
+
+Name the files, the owner each change extends, the risks, and the tests. Do this before editing.
+
+A large feature, or a missing decision that would change the result, stops here. This is the planning stage. Post the implementation plan and the acceptance criteria. Do not edit code, scenes, or assets until the user agrees.
+
+## Implement
+
+Once the plan is agreed, implement one coherent part at a time. Stay inside the current `ROADMAP.md` gate. Do not start the next gate until that gate's exit criteria are met. Extend the owner in E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\TECHNICAL_DESIGN.md. Follow .cursor/rules/. Do not invent a gameplay rule or edit an unrelated system.
+
+A persistence, recovery, or concurrent-session feature waits until the normal success path has been played and its result has survived a reload. Do not debug the happy path and the failure path in the same change.
+
+## Verify
+
+Follow E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\TEST_STRATEGY.md. Run the tests that cover the change when they can be run. Name anything that still needs the Unity Editor. Play Mode counts only if it was entered.
+
+## Report
+
+State what changed, the test results, any deviation from the plan, and what is still unverified.
+
+## Update
+
+Change E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\GDD.md, E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\TECHNICAL_DESIGN.md, E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\ROADMAP.md, E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\PROJECT_CONTEXT.md, or a feature spec only when this change altered a rule, a boundary, a requirement, or the current state. A new architectural decision goes in E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\DECISIONS\ and into E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\TECHNICAL_DESIGN.md. Do not write a document that only repeats the report.
