@@ -1,0 +1,17 @@
+{
+    "name": "SecondLife.Narrative",
+    "rootNamespace": "SecondLife.Narrative",
+    "references": [
+        "Ink",
+        "Ink-Libraries"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

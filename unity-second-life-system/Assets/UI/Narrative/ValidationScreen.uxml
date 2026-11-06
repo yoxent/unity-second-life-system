@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Narrative/ValidationScreen.uss?fileID=7433441132597879392&amp;guid=b224cc110b8501847a57e49b049c45b3&amp;type=3#ValidationScreen" />
+    <ui:VisualElement name="narrative-root" class="narrative-root">
+        <ui:VisualElement name="narrative-panel" class="narrative-panel">
+            <ui:Label name="narrative-body" class="narrative-body" />
+            <ui:Label name="narrative-status" class="narrative-status" />
+            <ui:VisualElement name="narrative-choices" class="narrative-choices" />
+            <ui:VisualElement name="narrative-actions" class="narrative-actions">
+                <ui:Button name="narrative-save" class="narrative-action" text="Save" />
+                <ui:Button name="narrative-load" class="narrative-action narrative-action--load" text="Load" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

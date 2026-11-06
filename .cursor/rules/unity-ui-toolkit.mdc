@@ -1,0 +1,119 @@
+---
+description: UI Toolkit standards. Static UI is authored in UXML and USS with UI Builder; C# controls existing elements but does not construct predefined hierarchies.
+globs: **/*.uxml, **/*.uss, **/UI/**/*.cs, **/*Presenter.cs, **/*View.cs, **/*Hud.cs
+alwaysApply: false
+---
+
+# Unity UI Toolkit
+
+Applies whenever a task involves UI Toolkit: authoring or editing UXML and USS, a `UIDocument`, a screen controller, or presenting data to the player.
+
+Read `unity-core.mdc` first. It carries the mandatory project standards, asset references, and compliance statuses. This file adds only UI-specific rules and does not restate them.
+
+If no file in the task matches the globs but the task still involves UI, follow this file anyway.
+
+## 1. UXML and USS authoring
+
+This is the UI-specific half of `unity-core.mdc` principle 3: C# does not replace authored structure.
+
+- All predefined UI structure is authored in UXML.
+- All visual styling is authored in USS: layout, spacing, colours, fonts, states, and themes.
+- Prefer USS classes over inline styles. A data-driven inline value, such as a progress bar width, is acceptable.
+- Give every element that C# queries a `name` attribute in the UXML.
+- Name USS classes by role, not by appearance.
+- Keep gameplay rules out of UXML, USS, and controllers.
+- C# is for querying elements, registering and handling events, updating data, managing UI state, communicating with game systems, and instantiating templates.
+
+## 2. UI Builder workflow
+
+Use Unity UI Builder as the preferred tool for creating and editing UXML and USS.
+
+- Author or edit the screen in UI Builder, then wire behaviour in C#.
+- Do not hand-write a visual tree in C# and port it later. Author it once, in the editor.
+- Keep UXML and USS in `Assets/UI/`, one folder per screen.
+- Screen assets are part of the deliverable. A controller without its UXML and USS is incomplete work. See `unity-workflow.mdc` section 3.
+
+## 3. Static vs. dynamic UI construction
+
+Decide this before writing code, and record the decision in the plan required by `unity-workflow.mdc` section 2.
+
+C# must not construct static hierarchies. Prohibited:
+
+- `new VisualElement()`, `new Label()`, `new Button()`, or other controls for predefined structure.
+- Defining a whole screen in C#.
+- Reproducing an existing UXML structure in runtime code.
+- Extensive visual styling in C# where USS applies.
+
+Runtime element creation is permitted only when the count or structure genuinely depends on runtime data:
+
+- Inventory entries.
+- Dynamic item lists.
+- Dialogue choices.
+- Procedural UI elements.
+- Repeated instances of a reusable UXML template.
+
+In every permitted case, author the visual structure as a UXML template and instantiate it. Do not hand-build the row and then populate it.
+
+A screen being displayed at runtime does not justify constructing it programmatically. Runtime UI still originates from authored UXML.
+
+- **Static:** fixed elements, labels, panels, fixed actions. Authored in UXML, referenced by name in C#.
+- **Dynamic count:** rows, lists, choices, repeated widgets. The container is authored in UXML; each instance comes from a UXML template.
+- **Dynamic structure:** rare. Still start from an authored UXML base and add only what runtime data requires.
+
+If a judgement call could go either way, prefer authored. The cost of adding a UXML template is lower than migrating a screen built in code.
+
+## 4. UI component architecture
+
+| Layer | Owns |
+| --- | --- |
+| UXML | Static hierarchy, element definitions, reusable visual structures |
+| USS | Layout, styling, themes, visual states |
+| C# controller | Initialization, queries, event handling, updates, interaction |
+| Game systems | Rules, data, state, persistence, business logic |
+
+- One controller per screen or reusable component. A screen controller does not reach into another screen's tree.
+- The controller does not own gameplay rules and does not mutate game state directly; it calls the owning system.
+- The controller exposes no public styling surface. Appearance changes go in USS.
+- The player-facing boundary follows `unity-core.mdc` section 5.
+
+## 5. UI lifecycle and event handling
+
+- `UIDocument` builds its visual tree in its own `OnEnable`. Query in `Start`, not `OnEnable`: component order among scripts on one `GameObject` is not guaranteed, so an `OnEnable` query can see an empty tree.
+- Query once and cache the results. Do not re-query every frame.
+- Do not resolve elements by child index or by walking `Children()`. Query by name.
+- Register event callbacks in `OnEnable` and remove them in `OnDisable`, or register and unregister in the same method pair, so a disabled component stops responding.
+- Unsubscribe from `clicked` on instantiated elements when you release them, so pooled or destroyed instances do not keep handlers alive.
+- Null-check a required element after querying. Log an error naming the element and the object, then disable the component. Do not continue silently with a null element.
+
+## 6. Reusable UI components
+
+- A repeated visual structure becomes a UXML template asset, not a helper method that builds it in code.
+- A composite widget with behaviour gets its own UXML asset and its own controller, with the `VisualTreeAsset` and `StyleSheet` serialized on that controller.
+- Templates are instantiated from a serialized `VisualTreeAsset` reference, never loaded by path. See `unity-core.mdc` section 1.
+- Shared styling lives in a shared USS file, not duplicated inline per screen.
+
+## 7. UI-specific inspector configuration
+
+- `UIDocument` gets its `VisualTreeAsset` and `PanelSettings` from the inspector, never from `AddComponent<UIDocument>()` or `ScriptableObject.CreateInstance<PanelSettings>()`.
+- The controller serializes every known UI dependency: `VisualTreeAsset`, template `VisualTreeAsset`, `StyleSheet`, `PanelSettings`, fonts, sprites, and the data assets the screen presents.
+- Prefer a UI prefab for a screen that is reused or opened per scene instance. Assign the `UIDocument`, `PanelSettings`, and controller fields on the prefab.
+- Do not add a canvas or event system for UI Toolkit. Input arrives through the panel.
+
+Serialization rules themselves are in `unity-core.mdc` section 4.
+
+## 8. UI validation
+
+Run these checks in addition to the standing conditions in `unity-core.mdc` section 6, and report them through `unity-workflow.mdc` section 6.
+
+- Static UI is authored in UXML.
+- Styling is authored in USS.
+- No unnecessary programmatic UI construction exists.
+- Known UI dependencies use serialized references.
+- No `Resources` or path-based loading exists for a UI asset.
+- Scene and prefab references are configured correctly.
+- Dynamic elements use reusable UXML templates.
+- Event callbacks are registered and removed correctly.
+- Element queries happen after the tree exists and are cached.
+- The implementation follows the existing project architecture.
+
+A UI change is not complete when its C# compiles. Open the scene or prefab and confirm the referenced assets resolve. Report which scene or prefab was opened.

@@ -1,0 +1,128 @@
+---
+description: Mandatory Unity standards for all Unity work. Serialized asset references, existing violations as migration targets, and documentation is not implementation compliance.
+alwaysApply: true
+---
+
+# Unity core
+
+Applies to every Unity task in this project. Process is in `unity-workflow.mdc`. UI Toolkit specifics are in `unity-ui-toolkit.mdc`.
+
+These are mandatory project standards, not recommendations. Do not choose a different implementation because it is faster to generate in C#.
+
+If a task touches UI at all, read `unity-ui-toolkit.mdc` even when no file matches its globs.
+
+## 1. Asset references
+
+Every known, predefined dependency is a serialized inspector reference: `VisualTreeAsset`, `StyleSheet`, `PanelSettings`, fonts, sprites and textures, `AudioClip`, `ScriptableObject`, prefab assets, and data assets such as `InkFile`.
+
+A scripted importer's main asset is directly referenceable. `InkFile` is the main asset that `InkImporter` produces for a `.ink` file, so `Resources` is never needed to reach it.
+
+Prohibited for a known dependency:
+
+- `Resources.Load` and `Resources.LoadAsync`.
+- Hardcoded or string-based asset paths.
+- `AssetDatabase.LoadAssetAtPath` in runtime code.
+- Runtime discovery of a reference that is already known.
+- Runtime loading used in place of a serialized reference.
+
+Do not add a `Resources` folder to make a reference easier to reach.
+
+This is not a ban on all runtime asset access. Permitted with genuine architectural justification: Addressables for managed assets, remote or downloadable content, user-generated content, modding, catalogues whose asset is unknown at authoring time, and deliberately designed asynchronous loading systems. Dynamic loading is never a workaround for an unassigned inspector field.
+
+Prefabs are referenced, not loaded by path. Spawn from a serialized prefab field and pool the instances.
+
+## 2. Existing violations
+
+Inspect an existing feature for violations when modifying it. Do not log a violation as a known gap and leave it indefinitely.
+
+- If the feature is in scope, migrate it.
+- If it is out of scope: name the violation, name the affected files and components, state the required migration, and record it as technical debt.
+
+Do not copy an outdated convention to stay consistent with it. These standards win unless an exception is approved under section 7.
+
+## 3. Implementation compliance
+
+Documentation is not compliance. None of these resolve a violation: updating the technical design, recording debt, describing a migration plan, adding source comments or warnings, or documenting intent.
+
+Order of work:
+
+1. Identify the actual violating scripts, assets, scenes, and prefabs.
+2. Determine the change that brings the implementation into compliance.
+3. Migrate, when it is in scope.
+4. Update the docs to match the resulting implementation.
+5. Verify against these standards.
+
+If migration is out of scope or cannot be done safely: leave the code unchanged, report that it remains non-compliant, name the exact components, and describe the remaining work. Never describe the violation as resolved and never claim project-wide compliance.
+
+Report exactly one status:
+
+| Status | Meaning |
+| --- | --- |
+| Compliant | Implementation inspected and verified against the standard |
+| Partially compliant | Some requirements met, outstanding violations remain |
+| Documentation only | Standard documented, implementation not migrated or verified |
+| Not verified | Insufficient evidence to establish compliance |
+
+Documented compliance is never implementation compliance.
+
+## 4. Inspector configuration and serialization
+
+Known dependencies are configurable through serialized references.
+
+- Private `[SerializeField]` fields by default.
+- Group related references with `[Header]`.
+- Validate required references at initialization.
+- Log a clear error naming the field and the object, then disable the component.
+- Preserve references in scenes and prefabs.
+- Never fall back to path-based loading for a missing reference.
+
+Do not serialize internal implementation detail. Expose meaningful dependencies and configuration only.
+
+## 5. Separation of responsibilities
+
+| Layer | Owns |
+| --- | --- |
+| Unity assets (scenes, prefabs, UXML, USS, ScriptableObjects) | Static structure, layout, styling, and configured dependencies |
+| MonoBehaviour controllers | Initialization, element and reference queries, event handling, presenting data, talking to game systems |
+| Game systems | Rules, data, state, persistence, business logic |
+
+Gameplay logic does not live in a presentation component. A presentation component does not own a rule.
+
+The UI Toolkit layer split is in `unity-ui-toolkit.mdc` section 4.
+
+## 6. Validation requirements
+
+These are the standing conditions for any Unity work. How and when to check them is in `unity-workflow.mdc` section 5.
+
+Before work is called complete:
+
+- Known dependencies are serialized, not loaded by path.
+- No unnecessary `Resources` or string-path lookup exists.
+- Scene and prefab references are configured, not merely declared.
+- Required references are validated with a clear error and no silent fallback.
+- The implementation matches the project architecture.
+- Any in-scope violation was migrated, not documented.
+
+Serialized wiring is not covered by EditMode tests. A prefab reference, a UXML asset, or a `PanelSettings` assignment is verified by opening the scene or prefab. Name which one was opened.
+
+If Unity Editor validation is unavailable, say exactly what was and was not verified. Never claim a test or verification that did not happen.
+
+## 7. Exception handling
+
+A deviation requires explicit justification:
+
+- The requirement that prevents following the standard.
+- Why the standard approach is unsuitable.
+- The alternative implementation.
+- Its trade-offs and maintenance cost.
+
+Do not silently introduce an exception or reinterpret these rules to permit one. Test code may construct objects and assets in code; that exception does not extend to project scripts.
+
+## 8. Core principles
+
+1. Known Unity assets are serialized inspector references.
+2. Dynamic loading is reserved for genuinely dynamic asset requirements.
+3. C# changes state and content; it does not replace authored structure.
+4. An existing violation is a migration target, not permission for another.
+5. Documentation is not implementation compliance.
+6. Scenes, prefabs, and assets are part of the implementation.

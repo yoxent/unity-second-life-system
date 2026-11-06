@@ -1,0 +1,64 @@
+.narrative-root {
+    flex-grow: 1;
+    padding-left: 80px;
+    padding-right: 80px;
+    padding-top: 80px;
+    padding-bottom: 80px;
+}
+
+.narrative-panel {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: rgb(245, 240, 230);
+    padding-left: 32px;
+    padding-right: 32px;
+    padding-top: 32px;
+    padding-bottom: 32px;
+}
+
+.narrative-body {
+    flex-grow: 1;
+    min-height: 240px;
+    font-size: 32px;
+    color: rgb(31, 26, 20);
+    white-space: normal;
+}
+
+.narrative-status {
+    min-height: 48px;
+    margin-top: 16px;
+    font-size: 24px;
+    color: rgb(31, 26, 20);
+    white-space: normal;
+}
+
+.narrative-choices {
+    flex-direction: column;
+    min-height: 160px;
+    margin-top: 16px;
+}
+
+.narrative-actions {
+    flex-direction: row;
+    margin-top: 16px;
+}
+
+.narrative-action {
+    flex-grow: 1;
+    height: 52px;
+    font-size: 24px;
+    background-color: rgb(219, 209, 189);
+    color: rgb(31, 26, 20);
+}
+
+.narrative-action--load {
+    margin-left: 12px;
+}
+
+.narrative-choice {
+    height: 52px;
+    margin-bottom: 8px;
+    font-size: 24px;
+    background-color: rgb(219, 209, 189);
+    color: rgb(31, 26, 20);
+}

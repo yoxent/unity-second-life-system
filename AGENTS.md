@@ -1,8 +1,17 @@
 Docs root: E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system
 
+# Mandatory project standards
+
+The `.cursor/rules/` files below are mandatory standards for all Unity work in this project, not optional guidance or suggestions. They override convenience, speed of generation, and consistency with older code. A deviation is allowed only through the exception process in `unity-core.mdc` section 7, with the justification recorded.
+
+Documentation, plans, comments, and recorded technical debt do not satisfy these standards. Only migrated, verified implementation does. Every report must state compliance status using the four statuses in `unity-core.mdc` section 3.
+
 | Path | Contents | When to read |
 | --- | --- | --- |
-| `.cursor/rules/*.mdc` | Reusable instructions and scoped coding constraints | Automatically, according to rule configuration |
+| `.cursor/rules/unity-core.mdc` | Mandatory Unity standards: asset references, existing violations, compliance, serialization, boundaries, validation, exceptions, principles | Always, every Unity task |
+| `.cursor/rules/unity-workflow.mdc` | Mandatory process: inspection, planning, scope, implementation, testing, reporting | Always, every Unity task |
+| `.cursor/rules/unity-ui-toolkit.mdc` | UI Toolkit: UXML and USS authoring, static vs dynamic UI, lifecycle, reusable components, UI validation | Any task involving UI Toolkit or UI presentation |
+| `.cursor/rules/advisor.mdc` | Advisor stance: accuracy over agreement, confidence tags | Always |
 | `AGENTS.md` | Project-wide agent instructions and documentation index | Every relevant agent session |
 | `E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\GDD.md` | Game design and gameplay rules | When designing or implementing gameplay |
 | `E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-system\TECHNICAL_DESIGN.md` | Architecture, dependencies and system ownership | When designing or changing systems |
@@ -26,8 +35,9 @@ Docs root: E:\Projects\Docs\unity-second-life-system\Unity\unity-second-life-sys
 - Read the relevant feature specification before implementing a substantial feature.
 
 ## Implementation
-- Follow the applicable rules in .cursor/rules/.
+- Follow the mandatory standards in `.cursor/rules/`. `unity-core.mdc` and `unity-workflow.mdc` apply to every Unity task. `unity-ui-toolkit.mdc` applies to any task involving UI.
 - Prefer incremental changes over broad rewrites.
+- Author structure in the editor. Static UI is UXML and USS; known assets are serialized inspector or prefab fields; do not build UI in runtime C# or load assets by path or through `Resources`. Existing violations are migration targets, not precedents.
 - Do not invent gameplay requirements or silently change approved decisions.
 - Do not modify unrelated systems or assets without justification.
 - Ask for clarification when a missing decision materially affects the implementation.

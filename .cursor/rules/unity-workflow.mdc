@@ -1,0 +1,86 @@
+---
+description: Mandatory process for all Unity work. Inspect the implementation, plan before editing, stay in scope, implement, test, and report honestly.
+alwaysApply: true
+---
+
+# Unity workflow
+
+Applies to every Unity task in this project, from a gameplay rule to a one-line fix. Unity standards are in `unity-core.mdc`. UI Toolkit specifics are in `unity-ui-toolkit.mdc`; read that file whenever a task involves UI.
+
+These are mandatory project standards, not recommendations.
+
+The depth scales with the change. A substantial feature gets the full pass. A one-line fix with an obvious site takes the same steps quickly and still reports honestly. None of the steps is skipped silently.
+
+## 1. Project inspection
+
+Read, before proposing a change:
+
+- `PROJECT_CONTEXT.md` for the current project state.
+- `GDD.md` when the task affects gameplay or game design.
+- `TECHNICAL_DESIGN.md` when it affects a boundary or system ownership.
+- The feature spec in `FEATURE_SPECS\` when that feature has one.
+- The Notion Story Bible and Systems & Mechanics Reference when it affects gameplay or world rules.
+- The Notion Development Tools page when it affects the toolchain.
+
+Inspect the existing implementation before proposing a new type. Read the actual scripts, scenes, prefabs, and assets, not only the documentation. Confirm what exists on disk against what a doc claims.
+
+Confirmed Notion text is design intent. Provisional and open text is not a requirement. A Notion recommendation is not adopted until it is recorded in the repo technical design or a decision file.
+
+If a missing decision would change the result, post it on the Notion AI to AI page and stop. Do not wait in the same session for the answer, and do not invent it.
+
+## 2. Planning before implementation
+
+Name the files, the owner each change extends, the risks, and the tests. Do this before editing.
+
+A plan for a UI task also names the UXML, USS, prefab, `PanelSettings`, and inspector assignments the change requires. Those are deliverables, not follow-up setup.
+
+A large feature, or a missing decision that would change the result, stops here. Post the implementation plan and the acceptance criteria. Do not edit code, scenes, or assets until the user agrees.
+
+When an existing violation is found, the plan states whether it is in scope for migration and, if not, records it as technical debt with the affected components named. See `unity-core.mdc` section 2.
+
+## 3. Scope management
+
+- Work inside the approved scope. A newly discovered unrelated problem is reported, not silently fixed.
+- Stay inside the current `ROADMAP.md` gate. Do not start the next gate until that gate's exit criteria are met.
+- Do not invent a gameplay rule or silently change an approved decision.
+- Do not modify unrelated systems, scenes, or assets without justification.
+- Do not create new work following an outdated convention just to stay consistent with it.
+- Ask for clarification when a missing decision materially affects the implementation.
+- Do not commit or push unless asked. Report the version control state and leave it untouched.
+- Prefer incremental changes over broad rewrites.
+
+If a fix would cross into out-of-scope work, say so and propose it separately rather than expanding the change.
+
+## 4. Implementation process
+
+Implement one coherent part at a time, and extend the owner named in `TECHNICAL_DESIGN.md`.
+
+- Follow `unity-core.mdc` and, for UI, `unity-ui-toolkit.mdc`.
+- Author structure in the editor: UXML, USS, prefabs, and serialized references.
+- Configure the scene or prefab references as part of the change. A controller whose references are unassigned is not finished work.
+- A persistence, recovery, or concurrent-session feature waits until the normal success path has been played and its result has survived a reload.
+- Do not debug the happy path and the failure path in the same change.
+- After editing scripts, check for compilation errors before relying on new types.
+
+## 5. Testing strategy
+
+Follow `TEST_STRATEGY.md`. The pass conditions are listed in `unity-core.mdc` section 6; this section is how to check them and how to report the result.
+
+- Run the tests that cover the change when they can be run, and report the actual result.
+- A passing EditMode suite is not evidence that a scene flow works. Say which path was not played.
+- Play Mode counts only if it was entered.
+- Serialized wiring is verified by opening the scene or prefab. Name which one was opened.
+- When the change is UI, also run the checks in `unity-ui-toolkit.mdc` section 8.
+- Never claim Unity Play Mode, a build, console cleanliness, or an editor flow unless that run happened.
+
+If a required check cannot be run, say which one and why, and mark the affected claim as unverified rather than omitting it.
+
+## 6. Final reporting
+
+State what changed, the test results, any deviation from the plan, and what is still unverified.
+
+Include the compliance status from `unity-core.mdc` section 3 whenever a standard was in scope: compliant, partially compliant, documentation only, or not verified. Name the components that remain non-compliant and the remaining work.
+
+Change `GDD.md`, `TECHNICAL_DESIGN.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, or a feature spec only when this change altered a rule, a boundary, a requirement, or the current state. A new architectural decision goes in `DECISIONS\` and into `TECHNICAL_DESIGN.md`. Do not write a document that only repeats the report.
+
+Keep documentation consistent with the actual implementation. Never describe a documented plan as a completed migration.
