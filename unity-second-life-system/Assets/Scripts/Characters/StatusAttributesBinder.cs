@@ -17,6 +17,11 @@ namespace SecondLife.Characters
         readonly ResourceBarView _health;
         readonly ResourceBarView _mana;
 
+        // The last state bound. The breakdown providers read it when the popover
+        // opens, so they report the current character rather than the one that
+        // existed when the trigger was registered.
+        CharacterState _state;
+
         StatusAttributesBinder(ResourceBarView health, ResourceBarView mana)
         {
             _health = health;
@@ -81,6 +86,29 @@ namespace SecondLife.Characters
 
             _health.Bind(state.Health);
             _mana.Bind(state.Mana);
+
+            // Held so the popover's providers can read current data each time it
+            // opens, rather than a snapshot taken at registration.
+            _state = state;
+        }
+
+        /// <summary>
+        /// Makes the two vital bars explainable.
+        ///
+        /// Only the vitals are registered. Max HP and mana capacity are the values
+        /// this game actually derives today, so the popover has real arithmetic to
+        /// show. The attribute rows are deliberately left inert: with no equipment
+        /// or growth path yet their modifier list is empty, and a hover that opened
+        /// a panel reading "Base 12 / Final 12" would be an affordance advertising
+        /// nothing. Register them when modifiers exist.
+        /// </summary>
+        public void RegisterBreakdowns(BreakdownPopover popover)
+        {
+            if (popover == null)
+                return;
+
+            popover.RegisterTrigger(_health.Root, () => _state?.ExplainMaxHealth());
+            popover.RegisterTrigger(_mana.Root, () => _state?.ExplainMaxMana());
         }
     }
 }

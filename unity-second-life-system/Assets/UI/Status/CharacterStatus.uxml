@@ -122,5 +122,32 @@
                 <ui:Label name="status-footer-hint" class="status-footer-hint" text="Skills and inventory have their own screens. Open them from the bar below." />
             </ui:VisualElement>
         </ui:VisualElement>
+
+        <!--
+          The breakdown popover. Authored and hidden, shown by BreakdownPopover when
+          the player hovers a value. It sits outside status-frame so a later change to
+          the frame's layout cannot clip it.
+
+          No overflow: hidden exists anywhere above it, which is why an absolutely
+          positioned panel is safe here. If an ancestor ever gains overflow hidden,
+          this must move.
+
+          The contribution lines are inserted at runtime from BreakdownLine.uxml,
+          because how many there are depends on the character's modifiers.
+        -->
+        <ui:VisualElement name="breakdown-popover" class="breakdown-popover">
+            <ui:Label name="breakdown-title" class="breakdown-title" />
+            <ui:VisualElement name="breakdown-lines" class="breakdown-lines" />
+
+            <ui:VisualElement name="breakdown-base-row" class="breakdown-row breakdown-row--base">
+                <ui:Label name="breakdown-base-label" class="breakdown-row-label" text="Base" />
+                <ui:Label name="breakdown-base-value" class="breakdown-row-value" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="breakdown-total-row" class="breakdown-row breakdown-row--total">
+                <ui:Label name="breakdown-total-label" class="breakdown-row-label" text="Final" />
+                <ui:Label name="breakdown-total-value" class="breakdown-row-value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

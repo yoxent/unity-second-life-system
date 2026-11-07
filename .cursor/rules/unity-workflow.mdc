@@ -53,17 +53,49 @@ If a fix would cross into out-of-scope work, say so and propose it separately ra
 
 ### Commit requests
 
-The user opens these with "sync docs, then commit this window's work". Sync the documentation first, then commit only what this chat window produced.
+"Sync docs, then commit this window's work" is a complete instruction. Sync the documentation first, then commit the changes this chat window produced. The window is the scope; do not ask which changes are meant.
 
 Two repositories are involved and they are separate: the Unity project, and the docs root named in `AGENTS.md`. Either can hold a valid commit, or neither.
 
-- Split by topic, not by file. Two unrelated concerns from one window are two commits, even when they touch adjacent files.
+- **One commit per repo per window.** A window produces at most two commits: one docs commit and one Unity commit. Several topics in one window do not become several commits; they become one commit whose message names each concern in turn. Do not split by topic, and do not split by file.
+- The one remaining split is branch isolation. A window that touches more than one project in the docs repo lands one commit per affected project branch, because those cannot share a commit.
 - A repo with nothing worth recording gets no commit. Never invent one to keep the two repos symmetrical.
-- Work that was already uncommitted when the window started is not part of this window. Leave it in the working tree. When it sits in the same file, or the same hunk, stage only this window's change and restore the rest.
-- **Every commit is asked for, including the first one in a repo.** Finishing an edit is not permission to commit it. "Sync it now", "write these", "fix that" and "add a note to the file" are instructions to change files, not to commit. Ask, name the proposed split, and wait.
-- A request to commit covers the commit the user is looking at. It is not standing permission for the commits that follow. After each commit, stop and let the user ask for the next one.
-- State the proposed split, with the repo, topic, and files of each commit, before committing anything. Grouping is cheapest to correct before the first commit lands.
+- Work that was already uncommitted when the window started is not part of this window. Leave it in the working tree. When it sits in the same file, or the same hunk, stage only this window's change with partial staging and leave the rest in place. One commit is the target size, not a licence to stage another window's work.
+- **Every commit is asked for.** Finishing an edit is not permission to commit it. "Sync it now", "write these", "fix that" and "add a note to the file" are instructions to change files, not to commit.
+- A commit request covers the commits it names: at most one per repo, both landing under that request. It is not standing permission afterwards. Once they land, stop and let the user ask again.
+- State the repo, the message, and the files of each commit before committing anything. Grouping is cheapest to correct before the first commit lands.
 - Order docs first when the documentation is the authority for the change, and code first when the code forces the documentation update.
+
+### Never revert uncommitted work to exclude it from a commit
+
+**Uncommitted content is newer than committed content.** `HEAD` is not the newest version of a file; the working tree is. So a command that "restores" a file from `HEAD` does not restore anything, it **deletes the newest work and reinstates an older version**. This has already happened once in this project: a working tree carrying a decided, approved reversal was reset to the superseded committed text to make a commit boundary cleaner, and the loss was only caught by luck.
+
+Prohibited for the purpose of excluding a change from a commit:
+
+- `git checkout -- <file>`, `git restore <file>`, `git checkout HEAD -- <file>`.
+- `git reset --hard`, or `git stash` without `pop`, on a file holding work this window must keep.
+- Copying a remembered or earlier-created backup over a working file without first checking what that backup contains.
+
+To stage part of a file, use **partial staging**: `git add -p` and choose hunks, or stage a patched copy and restore the working file from a verified source. To exclude another window's change from a commit, leave it in the working tree and do not stage it. Neither case requires reverting anything.
+
+Before any destructive operation on a file with uncommitted work, run the check and read the output rather than assuming:
+
+```powershell
+git diff -- <file>            # what the working tree has that HEAD does not
+git log -1 --format='%ad %s' --date=iso -- <file>   # how old HEAD's version is
+```
+
+If the diff contains a change someone decided on, it is the newest truth and it stays.
+
+### A backup is only a backup once it is checked
+
+A backup that was taken from an already-modified state is not a backup of the original, and calling it one makes the loss invisible. Before trusting or copying back any backup:
+
+- **Name it for what it contains**, not for what it is meant to be. `TECHNICAL_DESIGN.before-strip.md` says something; `TECHNICAL_DESIGN_full.md` claims completeness without evidence.
+- **Check it holds the specific thing at risk**, by searching the file for an identifiable line from that content, not by file size or timestamp.
+- **Take it before the first destructive step**, not between steps. A backup taken after a modification protects the modified state.
+
+The failure this prevents: a file was backed up while intact, then stripped for a commit, then re-copied over its own backup under a `_full` name, and the next restore used the stripped copy. Every individual step looked like a backup, and the content was gone twice.
 
 ## 4. Implementation process
 

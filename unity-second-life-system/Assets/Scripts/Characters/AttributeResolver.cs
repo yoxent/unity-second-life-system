@@ -114,6 +114,116 @@ namespace SecondLife.Characters
             }
         }
 
+        /// <summary>
+        /// Resolves one attribute and reports how it got there.
+        ///
+        /// The <see cref="ValueBreakdown.Total"/> is produced by
+        /// <see cref="ResolveOne"/> rather than recomputed here, so the popover
+        /// cannot show a total that differs from the number on the screen. Only
+        /// the per-contribution figures are derived, and they follow the same
+        /// grouping rules <see cref="ApplyModifiers"/> uses.
+        ///
+        /// Contributions are reported per source and stack key, not per modifier,
+        /// because that is the unit the player can act on: three overlapping
+        /// blessings are one line reading "whichever was strongest", not three
+        /// lines implying they all applied.
+        /// </summary>
+        public static ValueBreakdown Explain(
+            CharacterAttributes baseAttributes,
+            IReadOnlyList<AttributeModifier> modifiers,
+            AttributeKind attribute)
+        {
+            var baseValue = baseAttributes.Get(attribute);
+            var total = ResolveOne(baseAttributes, modifiers, attribute);
+
+            var title = CharacterDisplayText.FullLabel(attribute);
+
+            if (modifiers == null || modifiers.Count == 0)
+                return new ValueBreakdown(title, baseValue, null, total);
+
+            return new ValueBreakdown(title, baseValue, CollectContributions(modifiers, attribute), total);
+        }
+
+        /// <summary>
+        /// Groups modifiers the way <see cref="ApplyModifiers"/> does, then reports
+        /// each group as one contribution.
+        ///
+        /// Additive modifiers keep insertion order so a stable state reads the same
+        /// way twice. Strongest-only groups collapse to the winning magnitude,
+        /// which is why the reported figure can be smaller than the sum of what was
+        /// applied — that is the rule doing its job, not a display error.
+        /// </summary>
+        static List<BreakdownEntry> CollectContributions(
+            IReadOnlyList<AttributeModifier> modifiers,
+            AttributeKind attribute)
+        {
+            var entries = new List<BreakdownEntry>();
+
+            // Additive totals per (source, stackKey), in first-seen order.
+            var additiveOrder = new List<string>();
+            var additiveLabels = new Dictionary<string, string>();
+            var additiveTotals = new Dictionary<string, int>();
+
+            // Strongest-only winners per (source, stackKey, sign).
+            var strongestOrder = new List<string>();
+            var strongestLabels = new Dictionary<string, string>();
+            var strongestValues = new Dictionary<string, int>();
+
+            foreach (var modifier in modifiers)
+            {
+                if (modifier.Attribute != attribute)
+                    continue;
+
+                var groupKey = (int)modifier.Source + "|" + modifier.StackKey;
+                var label = CharacterDisplayText.ContributionLabel(modifier.Source, modifier.StackKey);
+
+                if (modifier.Policy == StackingPolicy.Additive)
+                {
+                    if (!additiveTotals.ContainsKey(groupKey))
+                    {
+                        additiveOrder.Add(groupKey);
+                        additiveLabels[groupKey] = label;
+                        additiveTotals[groupKey] = 0;
+                    }
+
+                    additiveTotals[groupKey] += modifier.Value;
+                    continue;
+                }
+
+                // The sign is part of the group, matching ApplyModifiers: a debuff
+                // competes only with other debuffs, so a buff cannot hide it.
+                var signedKey = groupKey + "|" + (modifier.Value >= 0 ? "+" : "-");
+                if (!strongestValues.TryGetValue(signedKey, out var existing))
+                {
+                    strongestOrder.Add(signedKey);
+                    strongestLabels[signedKey] = label;
+                    strongestValues[signedKey] = modifier.Value;
+                    continue;
+                }
+
+                var better = modifier.Value >= 0
+                    ? modifier.Value > existing
+                    : modifier.Value < existing;
+
+                if (better)
+                    strongestValues[signedKey] = modifier.Value;
+            }
+
+            foreach (var key in additiveOrder)
+            {
+                if (additiveTotals[key] != 0)
+                    entries.Add(new BreakdownEntry(additiveLabels[key], additiveTotals[key]));
+            }
+
+            foreach (var key in strongestOrder)
+            {
+                if (strongestValues[key] != 0)
+                    entries.Add(new BreakdownEntry(strongestLabels[key], strongestValues[key]));
+            }
+
+            return entries;
+        }
+
         static CharacterAttributes Build(CharacterAttributes source, int[] totals)
         {
             return new CharacterAttributes(

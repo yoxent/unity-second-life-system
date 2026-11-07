@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <!--
+      One contribution line in a breakdown popover.
+
+      Instantiated once per contribution, because the number of contributions is
+      runtime data. The row itself is authored here rather than built in C#.
+    -->
+    <ui:VisualElement name="breakdown-line" class="breakdown-line">
+        <ui:Label name="breakdown-line-label" class="breakdown-line-label" />
+        <ui:Label name="breakdown-line-value" class="breakdown-line-value" />
+    </ui:VisualElement>
+</ui:UXML>

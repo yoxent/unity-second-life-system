@@ -565,7 +565,16 @@ namespace SecondLife.Characters.Tests
                 "status-content",
                 "status-footer",
                 "description-panel",
-                "tabs-panel"
+                "tabs-panel",
+                // Breakdown popover. BreakdownPopover queries every one of these
+                // and refuses to build without them, so a rename in the UXML must
+                // fail here rather than at runtime in the scene.
+                "breakdown-popover",
+                "breakdown-title",
+                "breakdown-lines",
+                "breakdown-base-row",
+                "breakdown-base-value",
+                "breakdown-total-value"
             };
 
             foreach (var kind in AttributeKinds.All)
@@ -602,6 +611,20 @@ namespace SecondLife.Characters.Tests
         }
 
         [Test]
+        public void BreakdownLineTemplate_DefinesTheElementsThePopoverQueries()
+        {
+            var path = System.IO.Path.Combine(Application.dataPath, "UI", "Status", "BreakdownLine.uxml");
+            var uxml = System.IO.File.ReadAllText(path);
+
+            foreach (var elementName in new[] { "breakdown-line-label", "breakdown-line-value" })
+            {
+                Assert.That(uxml, Does.Contain($"name=\"{elementName}\""),
+                    $"BreakdownPopover queries '{elementName}' on each instantiated line, " +
+                    "which the authored template must define.");
+            }
+        }
+
+        [Test]
         public void Identity_CarriesTheAuthoredFieldsRatherThanTheProfileFlatteningThem()
         {
             _scaling = CreateScaling(20, 5, 10, 4);
@@ -610,6 +633,214 @@ namespace SecondLife.Characters.Tests
             Assert.That(_profile.Identity, Is.Not.Null, "A profile must always expose an identity block.");
             Assert.That(_profile.DisplayName, Is.EqualTo("Test Character"));
             Assert.That(_profile.Identity.Portrait, Is.Null, "Character art does not exist yet; null is a valid state.");
+        }
+
+        // ---- Breakdown -------------------------------------------------------
+
+        /// <summary>
+        /// The contract that makes the popover trustworthy: whatever
+        /// <see cref="AttributeResolver.Explain"/> reports as the total must be the
+        /// number the game actually uses. If someone changes the resolver's
+        /// stacking and forgets Explain, this fails instead of the screen quietly
+        /// lying about arithmetic.
+        /// </summary>
+        [Test]
+        public void Breakdown_TotalAlwaysMatchesTheResolvedValue()
+        {
+            var baseAttributes = Attributes(10, 10, 10, 10, 10, 10, 10);
+
+            var cases = new List<AttributeModifier[]>
+            {
+                new AttributeModifier[0],
+                new[] { new AttributeModifier(AttributeKind.Strength, 3, ModifierSource.Equipment, "sword") },
+                new[]
+                {
+                    new AttributeModifier(AttributeKind.Strength, 3, ModifierSource.Equipment, "sword"),
+                    new AttributeModifier(AttributeKind.Strength, 2, ModifierSource.Permanent, "training")
+                },
+                new[]
+                {
+                    new AttributeModifier(AttributeKind.Strength, 4, ModifierSource.StatusEffect, "blessing", StackingPolicy.StrongestOnly),
+                    new AttributeModifier(AttributeKind.Strength, 7, ModifierSource.StatusEffect, "blessing", StackingPolicy.StrongestOnly),
+                    new AttributeModifier(AttributeKind.Strength, 2, ModifierSource.StatusEffect, "blessing", StackingPolicy.StrongestOnly)
+                },
+                new[]
+                {
+                    new AttributeModifier(AttributeKind.Strength, 6, ModifierSource.StatusEffect, "aura", StackingPolicy.StrongestOnly),
+                    new AttributeModifier(AttributeKind.Strength, -4, ModifierSource.StatusEffect, "aura", StackingPolicy.StrongestOnly)
+                },
+                new[]
+                {
+                    new AttributeModifier(AttributeKind.Strength, -50, ModifierSource.StatusEffect, "wither")
+                }
+            };
+
+            foreach (var modifiers in cases)
+            {
+                var resolved = AttributeResolver.Resolve(baseAttributes, modifiers).Strength;
+                var breakdown = AttributeResolver.Explain(baseAttributes, modifiers, AttributeKind.Strength);
+
+                Assert.That(breakdown.Total, Is.EqualTo(resolved),
+                    $"Explain reported {breakdown.Total} where the resolver produced {resolved}. " +
+                    "The popover would contradict the number on the screen.");
+            }
+        }
+
+        [Test]
+        public void Breakdown_ReportsOneLinePerSourceAndStackKey()
+        {
+            var baseAttributes = Attributes(10, 10, 10, 10, 10, 10, 10);
+            var modifiers = new[]
+            {
+                new AttributeModifier(AttributeKind.Strength, 3, ModifierSource.Equipment, "sword"),
+                new AttributeModifier(AttributeKind.Strength, 2, ModifierSource.Equipment, "ring"),
+                new AttributeModifier(AttributeKind.Strength, 1, ModifierSource.Permanent, "training")
+            };
+
+            var breakdown = AttributeResolver.Explain(baseAttributes, modifiers, AttributeKind.Strength);
+
+            Assert.That(breakdown.BaseValue, Is.EqualTo(10));
+            Assert.That(breakdown.Entries.Count, Is.EqualTo(3),
+                "Each source and stack key is one line, because that is the unit the player can act on.");
+            Assert.That(breakdown.Total, Is.EqualTo(16));
+        }
+
+        [Test]
+        public void Breakdown_StrongestOnlyReportsTheWinnerNotTheSum()
+        {
+            var baseAttributes = Attributes(10, 10, 10, 10, 10, 10, 10);
+            var modifiers = new[]
+            {
+                new AttributeModifier(AttributeKind.Strength, 4, ModifierSource.StatusEffect, "blessing", StackingPolicy.StrongestOnly),
+                new AttributeModifier(AttributeKind.Strength, 7, ModifierSource.StatusEffect, "blessing", StackingPolicy.StrongestOnly)
+            };
+
+            var breakdown = AttributeResolver.Explain(baseAttributes, modifiers, AttributeKind.Strength);
+
+            // Three overlapping blessings are one line, saying 7. Reporting 4 and 7
+            // as separate lines would imply both applied.
+            Assert.That(breakdown.Entries.Count, Is.EqualTo(1));
+            Assert.That(breakdown.Entries[0].Value, Is.EqualTo(7));
+            Assert.That(breakdown.Total, Is.EqualTo(17));
+        }
+
+        [Test]
+        public void Breakdown_IgnoresModifiersForOtherAttributes()
+        {
+            var baseAttributes = Attributes(10, 10, 10, 10, 10, 10, 10);
+            var modifiers = new[]
+            {
+                new AttributeModifier(AttributeKind.Wisdom, 5, ModifierSource.Equipment, "helm"),
+                new AttributeModifier(AttributeKind.Strength, 2, ModifierSource.Equipment, "sword")
+            };
+
+            var strength = AttributeResolver.Explain(baseAttributes, modifiers, AttributeKind.Strength);
+            var wisdom = AttributeResolver.Explain(baseAttributes, modifiers, AttributeKind.Wisdom);
+            var agility = AttributeResolver.Explain(baseAttributes, modifiers, AttributeKind.Agility);
+
+            Assert.That(strength.Total, Is.EqualTo(12));
+            Assert.That(wisdom.Total, Is.EqualTo(15));
+            Assert.That(agility.Total, Is.EqualTo(10));
+            Assert.That(agility.HasContributions, Is.False, "An unmodified attribute reports no contributions.");
+        }
+
+        [Test]
+        public void Breakdown_ZeroModifiersReportsBaseEqualsTotal()
+        {
+            var baseAttributes = Attributes(12, 14, 13, 15, 17, 16, 18);
+
+            var breakdown = AttributeResolver.Explain(baseAttributes, null, AttributeKind.Strength);
+
+            Assert.That(breakdown.BaseValue, Is.EqualTo(12));
+            Assert.That(breakdown.Total, Is.EqualTo(12));
+            Assert.That(breakdown.HasContributions, Is.False);
+            Assert.That(breakdown.Title, Is.EqualTo("Strength"), "The popover title is the System's own word.");
+        }
+
+        [Test]
+        public void Breakdown_MaxHealthExplainsTheFlatBaseAndTheVitalityContribution()
+        {
+            _scaling = CreateScaling(baseHealth: 20, healthPerVitality: 5, baseMana: 10, manaPerSpirit: 4);
+            var attributes = Attributes(1, 14, 1, 1, 1, 1, 7);
+
+            var health = DerivedStatCalculator.ExplainMaxHealth(attributes, _scaling);
+
+            Assert.That(health.Title, Is.EqualTo("MAX HP"));
+            Assert.That(health.BaseValue, Is.EqualTo(20));
+            Assert.That(health.Total, Is.EqualTo(90), "20 base + 14 Vitality x 5");
+            Assert.That(health.Entries.Count, Is.EqualTo(1));
+            Assert.That(health.Entries[0].Label, Does.Contain("Vitality"));
+            Assert.That(health.Entries[0].Value, Is.EqualTo(70));
+
+            // The lines must add up to the total, or the panel is decoration.
+            Assert.That(health.BaseValue + health.Entries[0].Value, Is.EqualTo(health.Total));
+        }
+
+        [Test]
+        public void Breakdown_MaxManaExplainsTheFlatBaseAndTheSpiritContribution()
+        {
+            _scaling = CreateScaling(baseHealth: 20, healthPerVitality: 5, baseMana: 10, manaPerSpirit: 4);
+            var attributes = Attributes(1, 10, 1, 1, 1, 1, 7);
+
+            var mana = DerivedStatCalculator.ExplainMaxMana(attributes, _scaling);
+
+            Assert.That(mana.Title, Is.EqualTo("MANA"));
+            Assert.That(mana.BaseValue, Is.EqualTo(10));
+            Assert.That(mana.Total, Is.EqualTo(38), "10 base + 7 Spirit x 4");
+            Assert.That(mana.Entries.Count, Is.EqualTo(1));
+            Assert.That(mana.Entries[0].Value, Is.EqualTo(28));
+            Assert.That(mana.BaseValue + mana.Entries[0].Value, Is.EqualTo(mana.Total));
+        }
+
+        /// <summary>
+        /// The floor raises a value that would otherwise be zero. The contribution
+        /// line must report the difference that was actually realised, so base
+        /// plus lines still equals the total instead of claiming points the total
+        /// does not include.
+        /// </summary>
+        [Test]
+        public void Breakdown_FlooredDerivedValueStillAddsUp()
+        {
+            _scaling = CreateScaling(baseHealth: 0, healthPerVitality: 0, baseMana: 0, manaPerSpirit: 0);
+            var attributes = Attributes(1, 5, 1, 1, 1, 1, 5);
+
+            var health = DerivedStatCalculator.ExplainMaxHealth(attributes, _scaling);
+
+            Assert.That(health.Total, Is.EqualTo(DerivedStatCalculator.MinimumMaxHealth),
+                "A living character always has at least one point in a pool.");
+            Assert.That(health.BaseValue + SumEntries(health), Is.EqualTo(health.Total),
+                "The breakdown must reconcile with the floored total.");
+        }
+
+        [Test]
+        public void Breakdown_StateExposesThePopoversProviders()
+        {
+            var state = CreateState(Attributes(12, 14, 13, 15, 17, 16, 18));
+
+            state.AddModifier(new AttributeModifier(AttributeKind.Strength, 4, ModifierSource.Equipment, "sword"));
+
+            // The attribute breakdown is model-only for now: the screen wires the two
+            // vitals, and this path is what the attribute rows use once modifiers
+            // exist. It is covered here so it cannot rot in the meantime.
+            var strength = state.ExplainAttribute(AttributeKind.Strength);
+            Assert.That(strength.Total, Is.EqualTo(16));
+            Assert.That(strength.Entries.Count, Is.EqualTo(1));
+
+            // Vitality is unchanged, so Max HP reflects only the base Vitality.
+            var health = state.ExplainMaxHealth();
+            Assert.That(health.Total, Is.EqualTo(state.Derived.MaxHealth),
+                "The popover and the bar must read the same derivation.");
+
+            var mana = state.ExplainMaxMana();
+            Assert.That(mana.Total, Is.EqualTo(state.Derived.MaxMana));
+        }
+
+        static int SumEntries(ValueBreakdown breakdown)
+        {
+            var sum = 0;
+            foreach (var entry in breakdown.Entries)
+                sum += entry.Value;
+            return sum;
         }
 
         // ---- Helpers ---------------------------------------------------------

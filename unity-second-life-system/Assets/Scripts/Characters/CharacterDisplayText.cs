@@ -34,6 +34,35 @@ namespace SecondLife.Characters
         }
 
         /// <summary>
+        /// The System's word for where a modifier came from, used by the
+        /// breakdown popover. Kept here rather than in the resolver so the
+        /// resolver stays free of display concerns.
+        /// </summary>
+        public static string ModifierSourceLabel(ModifierSource source)
+        {
+            switch (source)
+            {
+                case ModifierSource.Equipment: return "Equipment";
+                case ModifierSource.Skill: return "Skill";
+                case ModifierSource.StatusEffect: return "Status effect";
+                case ModifierSource.Permanent: return "Permanent";
+                case ModifierSource.Temporary: return "Temporary";
+                default: return "Unknown";
+            }
+        }
+
+        /// <summary>
+        /// One contribution's caption: the source, plus the stack key when the
+        /// key names something the player would recognise. A keyless modifier
+        /// reads as its source alone rather than trailing a separator.
+        /// </summary>
+        public static string ContributionLabel(ModifierSource source, string stackKey)
+        {
+            var origin = ModifierSourceLabel(source);
+            return string.IsNullOrWhiteSpace(stackKey) ? origin : origin + " · " + stackKey;
+        }
+
+        /// <summary>
         /// Unrated reads as a word, not a letter, so it is not mistaken for a grade.
         /// </summary>
         public static string GradeLabel(CapabilityGrade grade)

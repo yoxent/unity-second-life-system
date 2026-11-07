@@ -89,6 +89,31 @@ namespace SecondLife.Characters
 
         public IReadOnlyList<AttributeModifier> Modifiers => _modifiers;
 
+        /// <summary>
+        /// How one attribute reached its current value, for the breakdown
+        /// popover. Presentation asks this rather than reaching into the
+        /// resolver, so the screen keeps depending on state, not on rules.
+        /// </summary>
+        public ValueBreakdown ExplainAttribute(AttributeKind kind)
+        {
+            return AttributeResolver.Explain(_baseAttributes, _modifiers, kind);
+        }
+
+        /// <summary>
+        /// How a derived pool maximum was reached. Reads the effective
+        /// attributes, so an equipped Vitality item shows as a raised ceiling
+        /// with the contribution named.
+        /// </summary>
+        public ValueBreakdown ExplainMaxHealth()
+        {
+            return DerivedStatCalculator.ExplainMaxHealth(EffectiveAttributes, _profile.Scaling);
+        }
+
+        public ValueBreakdown ExplainMaxMana()
+        {
+            return DerivedStatCalculator.ExplainMaxMana(EffectiveAttributes, _profile.Scaling);
+        }
+
         public DerivedStatistics Derived
         {
             get

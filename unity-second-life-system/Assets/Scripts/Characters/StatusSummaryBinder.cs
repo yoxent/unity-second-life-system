@@ -20,6 +20,10 @@ namespace SecondLife.Characters
         readonly ResourceBarView _mana;
         readonly Label _grade;
 
+        // Held so a breakdown opened later reads current data. Same reason as
+        // StatusAttributesBinder.
+        CharacterState _state;
+
         StatusSummaryBinder(ResourceBarView health, ResourceBarView mana, Label grade)
         {
             _health = health;
@@ -68,6 +72,24 @@ namespace SecondLife.Characters
             _health.Bind(state.Health);
             _mana.Bind(state.Mana);
             _grade.text = CharacterDisplayText.GradeLabel(state.CapabilityGrade);
+            _state = state;
+        }
+
+        /// <summary>
+        /// Makes the header's HP and mana readouts explainable.
+        ///
+        /// The header duplicates the vitals because it is readable from any tab,
+        /// so it needs the same explanation the vitals panel has. Both providers
+        /// read the same state through the same methods, so the two popovers can
+        /// never show different arithmetic for the same number.
+        /// </summary>
+        public void RegisterBreakdowns(BreakdownPopover popover)
+        {
+            if (popover == null)
+                return;
+
+            popover.RegisterTrigger(_health.Root, () => _state?.ExplainMaxHealth());
+            popover.RegisterTrigger(_mana.Root, () => _state?.ExplainMaxMana());
         }
     }
 }

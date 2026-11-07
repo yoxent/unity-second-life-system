@@ -449,3 +449,126 @@
     color: var(--ink-faint);
     letter-spacing: 1px;
 }
+
+/* ---- Breakdown popover ----
+ *
+ * Explains a value the player is looking at: the base, each contribution, and the
+ * final. Opened by hovering or latching a value; see BreakdownPopover.
+ *
+ * Absolute so it overlays the screen instead of reflowing it. There is no
+ * z-index in USS; panel order decides, and this element is the last child of
+ * status-root, so it draws above the frame.
+ *
+ * Width is fixed rather than content-driven so a long label cannot stretch the
+ * panel across the screen, and so the numbers stay aligned between one value's
+ * popover and the next.
+ */
+.breakdown-popover {
+    position: absolute;
+    width: 268px;
+    flex-direction: column;
+    background-color: var(--bg-popover);
+    border-width: 1px;
+    border-color: var(--border-popover);
+    border-radius: var(--radius-panel);
+    padding: 12px 14px;
+
+    /* Hidden until a value is hovered or latched. BreakdownPopover sets this to
+       flex; the default keeps it out of flow before any interaction. */
+    display: none;
+}
+
+.breakdown-title {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--ink-muted);
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+
+.breakdown-lines {
+    flex-direction: column;
+}
+
+.breakdown-line {
+    flex-direction: row;
+    align-items: center;
+    height: 22px;
+}
+
+.breakdown-line-label {
+    flex-grow: 1;
+    flex-shrink: 1;
+    font-size: 14px;
+    color: var(--ink-soft);
+}
+
+/* Contributions are tinted toward the accent: they are the explanation, and the
+   eye should find them before the base and final rows that bracket them. */
+.breakdown-line-value {
+    font-size: 14px;
+    color: var(--accent);
+    -unity-text-align: middle-right;
+    min-width: 56px;
+}
+
+.breakdown-row {
+    flex-direction: row;
+    align-items: center;
+    height: 24px;
+}
+
+.breakdown-row--base {
+    margin-top: 6px;
+    border-top-width: 1px;
+    border-top-color: var(--hairline);
+    padding-top: 4px;
+}
+
+.breakdown-row--total {
+    border-top-width: 1px;
+    border-top-color: var(--hairline);
+    margin-top: 2px;
+    padding-top: 4px;
+}
+
+.breakdown-row-label {
+    flex-grow: 1;
+    font-size: 14px;
+    color: var(--ink-muted);
+}
+
+.breakdown-row--total .breakdown-row-label {
+    color: var(--ink-soft);
+    -unity-font-style: bold;
+}
+
+.breakdown-row-value {
+    font-size: 15px;
+    color: var(--ink);
+    -unity-text-align: middle-right;
+    min-width: 56px;
+}
+
+.breakdown-row--total .breakdown-row-value {
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
+/*
+ * The hint that a value can be inspected. A value with no contributions still
+ * opens a popover, so this is not a "has modifiers" signal; it marks the region
+ * as interactive so the affordance is discoverable without a pointer.
+ */
+.breakdown-trigger {
+    border-bottom-width: 1px;
+    border-bottom-color: var(--transparent);
+}
+
+.breakdown-trigger:hover {
+    border-bottom-color: var(--accent-dim);
+}
+
+.breakdown-trigger:focus {
+    border-bottom-color: var(--accent);
+}

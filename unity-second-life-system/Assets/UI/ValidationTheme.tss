@@ -37,6 +37,13 @@
     --bar-health: rgb(196, 88, 84);
     --bar-mana: rgb(92, 138, 206);
 
+    /* The breakdown popover floats above the screen, so it needs to read as a
+       separate surface rather than a panel on the page. Slightly darker than
+       --bg-panel-raised with a brighter border, which is what lifts it off the
+       content behind it without a shadow (USS has no box-shadow). */
+    --bg-popover: rgb(20, 25, 36);
+    --border-popover: rgb(58, 76, 102);
+
     /* ---- Navigation bar metrics ---- */
     /* The bar's own height. NavigationBar.uss reads this. */
     --nav-height: 62px;

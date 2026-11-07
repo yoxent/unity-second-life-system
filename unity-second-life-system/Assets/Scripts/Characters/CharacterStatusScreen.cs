@@ -38,11 +38,15 @@ namespace SecondLife.Characters
         [Tooltip("Required. Template for one resource bar, reused by combat and party views.")]
         [SerializeField] VisualTreeAsset resourceBarTemplate;
 
+        [Tooltip("Required. Template for one contribution line in the breakdown popover.")]
+        [SerializeField] VisualTreeAsset breakdownLineTemplate;
+
         CharacterState _state;
         StatusIdentityBinder _identity;
         StatusSummaryBinder _summary;
         StatusAttributesBinder _attributes;
         StatusAssessmentBinder _assessment;
+        BreakdownPopover _breakdown;
 
         bool _started;
         bool _bound;
@@ -139,6 +143,15 @@ namespace SecondLife.Characters
                 return false;
             }
 
+            if (breakdownLineTemplate == null)
+            {
+                Debug.LogError(
+                    $"{nameof(CharacterStatusScreen)} on '{name}' has no Breakdown Line Template assigned. " +
+                    "Assign BreakdownLine.uxml in the inspector.",
+                    this);
+                return false;
+            }
+
             return true;
         }
 
@@ -167,6 +180,21 @@ namespace SecondLife.Characters
                 return;
             }
 
+            _breakdown = BreakdownPopover.Create(root, breakdownLineTemplate, this);
+            if (_breakdown == null)
+            {
+                enabled = false;
+                return;
+            }
+
+            // Vitals are where a derivation is actually visible today: Max HP is a
+            // flat base plus Vitality, so the popover has real arithmetic to show.
+            // The attribute rows are registered too. Until equipment exists their
+            // modifiers list is empty and the popover honestly reports base equals
+            // final, which is the truthful state rather than a hidden feature.
+            _attributes.RegisterBreakdowns(_breakdown);
+            _summary.RegisterBreakdowns(_breakdown);
+
             _state.Changed += Refresh;
             _bound = true;
 
@@ -182,6 +210,10 @@ namespace SecondLife.Characters
 
             // The document is about to clear its contents, so nothing here may
             // outlive this call.
+            if (_breakdown != null)
+                _breakdown.Clear();
+
+            _breakdown = null;
             _identity = null;
             _summary = null;
             _attributes = null;

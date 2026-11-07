@@ -612,6 +612,7 @@ MonoBehaviour:
   titleTemplate: {fileID: 9197481963319205126, guid: 4494fe225d28fc849972bf7afe7be559, type: 3}
   portraitTemplate: {fileID: 9197481963319205126, guid: 872fd3752fded8c4e98c58d503bebf94, type: 3}
   resourceBarTemplate: {fileID: 9197481963319205126, guid: 0458757bd4db090439b913f82cc37143, type: 3}
+  breakdownLineTemplate: {fileID: 9197481963319205126, guid: 4edc01098f7a0ea4383f9ddb0e6fb05d, type: 3}
 --- !u!114 &1014518976
 MonoBehaviour:
   m_ObjectHideFlags: 0
