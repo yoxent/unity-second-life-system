@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Figma Mapping
   m_EditorClassIdentifier: Unity.UIToolkit.Figma.Editor::Unity.UIToolkit.Figma.FigmaImportSettings
   fontMap: []
-  classPrefix: 
+  classPrefix: figma
   controlMap: []
