@@ -1,10 +1,13 @@
 :root {
     --bg-page: rgb(9, 11, 17);
     --bg-panel: rgb(18, 22, 32);
+    --bg-panel-raised: rgb(24, 29, 41);
+    --bg-header: rgb(14, 17, 26);
     --bg-portrait: rgb(13, 16, 24);
     --border-portrait: rgb(58, 76, 102);
     --portrait-placeholder: rgb(72, 86, 108);
     --accent: rgb(126, 176, 214);
+    --accent-dim: rgb(64, 96, 124);
     --ink: rgb(238, 240, 246);
     --ink-soft: rgb(186, 194, 210);
     --ink-meta: rgb(200, 208, 222);
@@ -13,57 +16,97 @@
     --ink-faint: rgb(96, 106, 124);
     --hairline: rgb(38, 46, 62);
     --transparent: rgba(0, 0, 0, 0);
+
+    /* Resource bars. Health and mana are distinguished by colour as well as by
+       their label, because a bar is read at a glance rather than read out. */
+    --bar-track: rgb(30, 37, 51);
+    --bar-health: rgb(196, 88, 84);
+    --bar-mana: rgb(92, 138, 206);
+
+    --gap-edge: 28px;
+    --gap-block: 20px;
+    --radius-panel: 6px;
 }
 
+/*
+ * The screen fills the viewport. This is a point-and-click surface, not a
+ * centred card: the player navigates by buttons, so the interactive area is the
+ * whole screen and every region is reachable without hunting for a box.
+ *
+ * The root stretches instead of centring. A fixed max-width card would waste the
+ * sides and shrink the button targets as resolution drops.
+ */
 .status-root {
     flex-grow: 1;
-    align-items: center;
-    justify-content: center;
-    padding-left: 80px;
-    padding-right: 80px;
-    padding-top: 40px;
-    padding-bottom: 40px;
+    flex-direction: column;
     background-color: var(--bg-page);
+    padding-left: var(--gap-edge);
+    padding-right: var(--gap-edge);
+    padding-top: var(--gap-edge);
+    padding-bottom: var(--gap-edge);
 }
 
+/*
+ * Column layout with a header, a content region that consumes the leftover
+ * height, and a footer. Content is the only flexible band, so the header and
+ * footer stay put when a tab's contents differ in length.
+ */
 .status-frame {
-    width: 100%;
-    max-width: 1000px;
+    flex-grow: 1;
     flex-direction: column;
     background-color: var(--bg-panel);
-    border-width: 3px;
-    border-color: var(--accent);
-    padding-left: 32px;
-    padding-right: 32px;
-    padding-top: 22px;
-    padding-bottom: 24px;
+}
+
+/* ---- Header: identity on the left, a live summary on the right ---- */
+
+.status-header {
+    flex-direction: column;
+    flex-shrink: 0;
+    background-color: var(--bg-header);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--hairline);
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+/* Identity left, the always-visible readout right. */
+.header-main {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.identity-block {
+    flex-direction: column;
+    flex-grow: 1;
+    flex-shrink: 1;
 }
 
 .status-heading {
-    font-size: 18px;
+    font-size: 14px;
     letter-spacing: 6px;
-    color: var(--accent);
+    color: var(--accent-dim);
     -unity-font-style: bold;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
 }
-
-/* ---- Identity: portrait beside the name, not stacked above it ---- */
 
 .status-identity {
     flex-direction: row;
-    margin-bottom: 18px;
+    flex-grow: 1;
+    flex-shrink: 1;
 }
 
 .identity-portrait-host {
-    width: 132px;
-    height: 132px;
-    margin-right: 24px;
+    width: 120px;
+    height: 120px;
+    margin-right: 20px;
     flex-shrink: 0;
 }
 
 .portrait-frame {
-    width: 132px;
-    height: 132px;
+    width: 120px;
+    height: 120px;
     background-color: var(--bg-portrait);
     border-width: 2px;
     border-color: var(--border-portrait);
@@ -79,7 +122,7 @@
 }
 
 .portrait-placeholder {
-    font-size: 40px;
+    font-size: 36px;
     color: var(--portrait-placeholder);
 }
 
@@ -88,64 +131,138 @@
 }
 
 .identity-details {
-    flex-grow: 1;
     flex-direction: column;
+    flex-grow: 1;
+    flex-shrink: 1;
     justify-content: center;
 }
 
 .character-name {
-    font-size: 38px;
+    font-size: 34px;
     color: var(--ink);
     -unity-font-style: bold;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .identity-meta {
     flex-direction: row;
-    margin-bottom: 10px;
+    flex-wrap: wrap;
 }
 
 .identity-meta-item {
     flex-direction: column;
-    margin-right: 32px;
+    margin-right: 28px;
+    margin-bottom: 4px;
 }
 
 .status-caption {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--ink-muted);
     letter-spacing: 1px;
     -unity-font-style: bold;
 }
 
 .identity-meta-value {
-    font-size: 19px;
+    font-size: 18px;
     color: var(--ink-meta);
     margin-top: 2px;
 }
 
+/* The always-visible readout. A point-and-click game shows the numbers the
+   player checks most often without making them open a tab. */
+.status-summary {
+    flex-direction: column;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: var(--gap-block);
+    padding-left: 24px;
+    border-left-width: 1px;
+    border-left-color: var(--hairline);
+}
+
+.summary-row {
+    flex-direction: row;
+    align-items: center;
+    height: 30px;
+}
+
+.summary-label {
+    width: 64px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--ink-muted);
+    -unity-font-style: bold;
+}
+
+.summary-value {
+    font-size: 22px;
+    color: var(--ink);
+    -unity-text-align: middle-right;
+    min-width: 64px;
+}
+
+/* ---- Content: fills the remaining height, never scrolls the frame ---- */
+
+.status-content {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: stretch;
+    padding: var(--gap-block);
+}
+
+.content-panel {
+    flex-direction: column;
+    background-color: var(--bg-panel-raised);
+    border-radius: var(--radius-panel);
+    padding: 20px;
+}
+
+.content-panel--description {
+    width: 30%;
+    flex-shrink: 0;
+    margin-right: var(--gap-block);
+}
+
+.content-panel--tabs {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
 .identity-description {
-    font-size: 16px;
+    font-size: 17px;
     color: var(--ink-description);
     white-space: normal;
     -unity-font-style: italic;
-    max-width: 640px;
+    line-height: 1.45;
+}
+
+.status-section-heading {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--ink-muted);
+    -unity-font-style: bold;
+    margin-bottom: 12px;
 }
 
 /* ---- Tabs ---- */
 
 .status-tabs {
     flex-direction: row;
+    flex-shrink: 0;
     border-bottom-width: 1px;
     border-bottom-color: var(--hairline);
     margin-bottom: 18px;
 }
 
+/*
+ * Button targets are the primary interaction. Each tab is wide enough to hit
+ * comfortably and shows a visible focus band, because navigation is click-only.
+ */
 .status-tab {
-    height: 40px;
-    padding-left: 22px;
-    padding-right: 22px;
-    margin-right: 4px;
-    font-size: 17px;
+    height: 44px;
+    padding-left: 28px;
+    padding-right: 28px;
+    font-size: 16px;
     color: var(--ink-muted);
     background-color: var(--transparent);
     border-left-width: 0;
@@ -155,10 +272,16 @@
     border-bottom-color: var(--transparent);
     -unity-font-style: bold;
     letter-spacing: 1px;
+    transition-property: color, border-bottom-color;
+    transition-duration: 0.12s;
 }
 
 .status-tab:hover {
-    color: var(--ink-soft);
+    color: var(--ink);
+}
+
+.status-tab:active {
+    color: var(--accent);
 }
 
 .status-tab--active {
@@ -175,11 +298,12 @@
     display: none;
 }
 
-/* ---- Attributes and derived ---- */
+/* ---- Attributes and derived, side by side and filling the panel ---- */
 
 .status-body {
     flex-direction: row;
-    margin-bottom: 18px;
+    flex-grow: 1;
+    align-items: flex-start;
 }
 
 .status-column {
@@ -189,32 +313,24 @@
 .status-attributes {
     flex-grow: 1;
     flex-basis: 0;
+    margin-right: var(--gap-block);
 }
 
 .status-derived {
     flex-grow: 1;
     flex-basis: 0;
-    margin-left: 44px;
-}
-
-.status-section-heading {
-    font-size: 14px;
-    letter-spacing: 3px;
-    color: var(--ink-muted);
-    -unity-font-style: bold;
-    margin-bottom: 10px;
 }
 
 .attribute-row {
     flex-direction: row;
     align-items: center;
-    height: 34px;
+    height: 38px;
     border-bottom-width: 1px;
     border-bottom-color: var(--hairline);
 }
 
 .attribute-label {
-    width: 64px;
+    width: 68px;
     font-size: 19px;
     color: var(--accent);
     -unity-font-style: bold;
@@ -230,7 +346,7 @@
 .derived-row {
     flex-direction: row;
     align-items: center;
-    height: 34px;
+    height: 38px;
     border-bottom-width: 1px;
     border-bottom-color: var(--hairline);
 }
@@ -252,22 +368,23 @@
     color: var(--ink-faint);
     white-space: normal;
     margin-top: 12px;
+    line-height: 1.4;
 }
 
-/* ---- Assessment, inside the derived column ---- */
+/* ---- Assessment ---- */
 
 .status-assessment {
     flex-direction: column;
     border-top-width: 1px;
     border-top-color: var(--hairline);
-    margin-top: 18px;
-    padding-top: 14px;
+    margin-top: 20px;
+    padding-top: 16px;
 }
 
 .assessment-row {
     flex-direction: row;
     align-items: center;
-    height: 30px;
+    height: 32px;
 }
 
 .assessment-label {
@@ -279,7 +396,7 @@
 .assessment-label--titles {
     margin-top: 12px;
     color: var(--ink-muted);
-    font-size: 14px;
+    font-size: 12px;
     letter-spacing: 3px;
     -unity-font-style: bold;
 }
@@ -302,4 +419,92 @@
 
 .status-title--none {
     color: var(--ink-faint);
+}
+
+/* ---- Resource bars: label, current/max readout, and a fill ---- */
+
+.summary-bar-host {
+    margin-bottom: 8px;
+}
+
+.derived-bar-host {
+    margin-bottom: 16px;
+}
+
+.resource-row {
+    flex-direction: column;
+}
+
+.resource-label {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--ink-muted);
+    -unity-font-style: bold;
+}
+
+.resource-value {
+    font-size: 20px;
+    color: var(--ink);
+    margin-top: 2px;
+    margin-bottom: 5px;
+}
+
+/* The track. A fixed height keeps every bar the same thickness regardless of
+   the font size beside it, so stacked bars line up. */
+.resource-bar {
+    height: 8px;
+    flex-direction: row;
+    background-color: var(--bar-track);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/*
+ * The fill width is set from C# as a percentage of the pool, which the UI
+ * standards permit for a value that depends on runtime state. Everything else
+ * about the bar, including its colour, is authored here.
+ */
+.resource-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition-property: width;
+    transition-duration: 0.15s;
+}
+
+.resource-bar-fill--health {
+    background-color: var(--bar-health);
+}
+
+.resource-bar-fill--mana {
+    background-color: var(--bar-mana);
+}
+
+/* An empty pool still shows a track, so the row never collapses to nothing.
+   It only changes the fill colour, not the layout. */
+.resource-bar--health.resource-bar {
+    background-color: var(--bar-track);
+}
+
+.resource-bar--mana.resource-bar {
+    background-color: var(--bar-track);
+}
+
+/* ---- Footer ---- */
+
+.status-footer {
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    border-top-width: 1px;
+    border-top-color: var(--hairline);
+    background-color: var(--bg-header);
+    padding-left: 24px;
+    padding-right: 24px;
+    height: 40px;
+}
+
+.status-footer-hint {
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 1px;
 }

@@ -5,33 +5,48 @@ using UnityEngine.UIElements;
 namespace SecondLife.Characters
 {
     /// <summary>
-    /// Writes the seven attribute rows and the derived values.
+    /// Writes the seven attribute rows and the vital bars.
     ///
     /// Reads <see cref="CharacterState.EffectiveAttributes"/>, so an equipment or
     /// status modifier is reflected without this binder knowing modifiers exist.
+    /// The bars read the live pools, so a spent point shows here immediately.
     /// </summary>
     public sealed class StatusAttributesBinder
     {
         readonly Dictionary<AttributeKind, Label> _values = new Dictionary<AttributeKind, Label>();
-        readonly Label _maxHealth;
-        readonly Label _maxMana;
+        readonly ResourceBarView _health;
+        readonly ResourceBarView _mana;
 
-        StatusAttributesBinder(Label maxHealth, Label maxMana)
+        StatusAttributesBinder(ResourceBarView health, ResourceBarView mana)
         {
-            _maxHealth = maxHealth;
-            _maxMana = maxMana;
+            _health = health;
+            _mana = mana;
         }
 
-        public static StatusAttributesBinder Create(VisualElement root, Object context)
+        public static StatusAttributesBinder Create(
+            VisualElement root,
+            VisualTreeAsset barTemplate,
+            Object context)
         {
-            var maxHealth = root.Q<Label>("derived-max-health");
-            var maxMana = root.Q<Label>("derived-max-mana");
+            var healthHost = root.Q<VisualElement>("derived-health-host");
+            var manaHost = root.Q<VisualElement>("derived-mana-host");
 
             var missing = new List<string>();
-            if (maxHealth == null) missing.Add("derived-max-health");
-            if (maxMana == null) missing.Add("derived-max-mana");
+            if (healthHost == null) missing.Add("derived-health-host");
+            if (manaHost == null) missing.Add("derived-mana-host");
 
-            var binder = new StatusAttributesBinder(maxHealth, maxMana);
+            var health = ResourceBarView.Create(barTemplate, "HP", context);
+            var mana = ResourceBarView.Create(barTemplate, "MANA", context);
+            if (health == null || mana == null)
+                return null;
+
+            health.SetTone(ResourceTone.Health);
+            mana.SetTone(ResourceTone.Mana);
+
+            healthHost.Add(health.Root);
+            manaHost.Add(mana.Root);
+
+            var binder = new StatusAttributesBinder(health, mana);
 
             foreach (var kind in AttributeKinds.All)
             {
@@ -64,9 +79,8 @@ namespace SecondLife.Characters
             foreach (var kind in AttributeKinds.All)
                 _values[kind].text = attributes.Get(kind).ToString();
 
-            var derived = state.Derived;
-            _maxHealth.text = derived.MaxHealth.ToString();
-            _maxMana.text = derived.MaxMana.ToString();
+            _health.Bind(state.Health);
+            _mana.Bind(state.Mana);
         }
     }
 }

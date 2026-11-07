@@ -41,12 +41,14 @@ namespace SecondLife.Characters.PlayModeTests
             Assert.That(document, Is.Not.Null, $"'{StatusObject}' must carry a UIDocument.");
 
             var name = AssertLabel(document, "character-name");
-            var maxHealth = AssertLabel(document, "derived-max-health");
+            var healthValue = AssertLabel(document, "resource-value");
 
             Assert.That(name.text, Is.Not.Empty,
                 "The status screen rendered an empty name. The presenter did not bind to the live tree.");
-            Assert.That(maxHealth.text, Is.Not.Empty,
-                "The status screen rendered empty derived values. The presenter did not bind to the live tree.");
+            Assert.That(healthValue.text, Is.Not.Empty,
+                "The status screen rendered an empty resource readout. The presenter did not bind to the live tree.");
+            Assert.That(healthValue.text, Does.Contain("/"),
+                "The resource readout must show current and maximum, not a bare number.");
         }
 
         [UnityTest]
@@ -59,7 +61,7 @@ namespace SecondLife.Characters.PlayModeTests
 
             var document = screen.GetComponent<UIDocument>();
             var before = AssertLabel(document, "character-name").text;
-            var beforeMaxHealth = AssertLabel(document, "derived-max-health").text;
+            var beforeReadout = FirstResourceReadout(document);
 
             Assert.That(before, Is.Not.Empty, "Precondition: the screen rendered a name before the cycle.");
 
@@ -74,14 +76,14 @@ namespace SecondLife.Characters.PlayModeTests
             yield return null;
 
             var after = AssertLabel(document, "character-name").text;
-            var afterMaxHealth = AssertLabel(document, "derived-max-health").text;
+            var afterReadout = FirstResourceReadout(document);
 
             Assert.That(after, Is.EqualTo(before),
                 "The name was lost across a disable/enable cycle. The presenter is holding references into a discarded tree.");
             Assert.That(after, Is.Not.Empty,
                 "The name was empty after a disable/enable cycle. Bind in Start and rebind in OnEnable.");
-            Assert.That(afterMaxHealth, Is.EqualTo(beforeMaxHealth),
-                "Derived values were lost across a disable/enable cycle.");
+            Assert.That(afterReadout, Is.EqualTo(beforeReadout),
+                "The resource readout was lost across a disable/enable cycle.");
         }
 
         [UnityTest]
@@ -120,6 +122,102 @@ namespace SecondLife.Characters.PlayModeTests
                 "The skills page did not open after a re-enable. The tab handler was not re-registered.");
             Assert.That(attributesPageAfter.ClassListContains("status-page--hidden"), Is.True,
                 "The attributes page stayed visible after switching to skills on a re-enabled screen.");
+        }
+
+        [UnityTest]
+        public IEnumerator StatusScreen_ResourceBarsShowCurrentAndMaxWithAProportionalFill()
+        {
+            yield return LoadScene();
+
+            var screen = FindStatusScreen();
+            Assert.That(screen, Is.Not.Null, $"'{StatusObject}' must carry a CharacterStatusScreen in {SceneName}.");
+
+            var document = screen.GetComponent<UIDocument>();
+            var root = document.rootVisualElement;
+
+            var readouts = root.Query<Label>(name: "resource-value").ToList();
+            Assert.That(readouts.Count, Is.GreaterThanOrEqualTo(2),
+                "Expected at least an HP bar and a mana bar, each with a current / max readout.");
+
+            foreach (var readout in readouts)
+            {
+                Assert.That(readout.text, Does.Contain("/"),
+                    $"Resource readout '{readout.text}' must show current and maximum.");
+            }
+
+            // Layout settles the frame after a style change, so measure after a yield.
+            yield return null;
+
+            var bars = root.Query<VisualElement>(name: "resource-bar").ToList();
+            var fills = root.Query<VisualElement>(name: "resource-bar-fill").ToList();
+            Assert.That(fills.Count, Is.EqualTo(readouts.Count),
+                "Every resource bar needs a fill element.");
+
+            for (var i = 0; i < fills.Count; i++)
+            {
+                Assert.That(bars[i].resolvedStyle.height, Is.GreaterThan(0f),
+                    "A resource bar rendered with no height, so the fill cannot be seen.");
+                Assert.That(fills[i].resolvedStyle.width, Is.GreaterThan(0f),
+                    "A non-empty pool must render a visible fill.");
+
+                // The fill must be a proportion of its track, not an arbitrary width.
+                var fraction = fills[i].resolvedStyle.width / bars[i].resolvedStyle.width;
+                var expected = ParseFraction(readouts[i].text);
+                Assert.That(fraction, Is.EqualTo(expected).Within(0.02f),
+                    $"Bar {i} shows '{readouts[i].text}' but its fill is {fraction:P0} of the track. " +
+                    "The bar does not match the readout beside it.");
+            }
+        }
+
+        /// <summary>
+        /// Reads "current / max" and returns the fraction. Guards the bar against a
+        /// readout that changes while its fill does not.
+        /// </summary>
+        static float ParseFraction(string readout)
+        {
+            var parts = readout.Split('/');
+            Assert.That(parts.Length, Is.EqualTo(2), $"Resource readout '{readout}' must be 'current / max'.");
+
+            var current = float.Parse(parts[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+            var max = float.Parse(parts[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+            Assert.That(max, Is.GreaterThan(0f), $"Resource readout '{readout}' must have a positive maximum.");
+            return current / max;
+        }
+
+        [UnityTest]
+        public IEnumerator StatusScreen_PanelKeepsItsHeightAcrossTabs()
+        {
+            yield return LoadScene();
+
+            var screen = FindStatusScreen();
+            Assert.That(screen, Is.Not.Null, $"'{StatusObject}' must carry a CharacterStatusScreen in {SceneName}.");
+
+            var document = screen.GetComponent<UIDocument>();
+            var frame = AssertElement(document, "status-frame");
+
+            // Layout settles on the frame after a style change, so each reading is
+            // taken once after a yield rather than in the same frame as the click.
+            yield return null;
+            var attributesHeight = frame.resolvedStyle.height;
+            Assert.That(attributesHeight, Is.GreaterThan(0f),
+                "The status frame resolved to zero height. Layout has not run yet.");
+
+            var skillsTab = AssertButton(document, "status-tab-skills");
+            InvokeHandlers(skillsTab);
+            yield return null;
+
+            var skillsHeight = frame.resolvedStyle.height;
+
+            Assert.That(skillsHeight, Is.EqualTo(attributesHeight).Within(0.5f),
+                "The panel resized when switching tabs. A short tab must not shrink the frame, " +
+                "or the tab strip moves under the pointer between clicks.");
+
+            var attributesTab = AssertButton(document, "status-tab-attributes");
+            InvokeHandlers(attributesTab);
+            yield return null;
+
+            Assert.That(frame.resolvedStyle.height, Is.EqualTo(attributesHeight).Within(0.5f),
+                "The panel did not return to its original height when switching back.");
         }
 
         [UnityTest]
@@ -218,6 +316,19 @@ namespace SecondLife.Characters.PlayModeTests
         {
             Assert.That(document, Is.Not.Null);
             return document.rootVisualElement.resolvedStyle.display;
+        }
+
+        /// <summary>
+        /// The first "current / max" readout on screen, which the resource bars
+        /// render. Used to prove the pools survive a lifecycle cycle without
+        /// pinning the test to one bar's position in the tree.
+        /// </summary>
+        static string FirstResourceReadout(UIDocument document)
+        {
+            var labels = document.rootVisualElement.Query<Label>(name: "resource-value").ToList();
+            Assert.That(labels.Count, Is.GreaterThan(0),
+                "No resource bars rendered. The status screen must show current and maximum for HP and mana.");
+            return labels[0].text;
         }
 
         static Label AssertLabel(UIDocument document, string elementName)

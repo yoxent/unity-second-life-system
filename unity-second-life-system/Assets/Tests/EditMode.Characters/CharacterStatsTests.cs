@@ -319,6 +319,106 @@ namespace SecondLife.Characters.Tests
             }
         }
 
+        // ---- Resource pools --------------------------------------------------
+
+        [Test]
+        public void Pool_StartsFullAndReportsTheFractionTheBarReads()
+        {
+            var pool = new ResourcePool(100);
+
+            Assert.That(pool.Current, Is.EqualTo(100));
+            Assert.That(pool.Max, Is.EqualTo(100));
+            Assert.That(pool.Fraction, Is.EqualTo(1f));
+        }
+
+        [Test]
+        public void Pool_SpendLowersTheFractionAndClampsAtZero()
+        {
+            var pool = new ResourcePool(100);
+
+            pool.Spend(25);
+            Assert.That(pool.Current, Is.EqualTo(75));
+            Assert.That(pool.Fraction, Is.EqualTo(0.75f).Within(0.0001f));
+
+            pool.Spend(500);
+            Assert.That(pool.Current, Is.EqualTo(0), "Spending more than remains stops at zero, never negative.");
+            Assert.That(pool.Fraction, Is.EqualTo(0f));
+            Assert.That(pool.IsEmpty, Is.True);
+        }
+
+        [Test]
+        public void Pool_RestoreDoesNotExceedTheMaximum()
+        {
+            var pool = new ResourcePool(100);
+            pool.Spend(40);
+
+            pool.Restore(20);
+            Assert.That(pool.Current, Is.EqualTo(80));
+
+            pool.Restore(999);
+            Assert.That(pool.Current, Is.EqualTo(100), "Restoring more than the maximum stops at the maximum.");
+            Assert.That(pool.Fraction, Is.EqualTo(1f));
+        }
+
+        [Test]
+        public void Pool_AZeroMaximumDoesNotDivideByZero()
+        {
+            var pool = new ResourcePool(0);
+
+            Assert.That(pool.Fraction, Is.EqualTo(0f), "A bar must not divide by a zero maximum.");
+            Assert.That(pool.Current, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Pool_RaisingTheMaximumKeepsTheCurrentValue()
+        {
+            var pool = new ResourcePool(100);
+            pool.Spend(30);
+
+            pool.SetMax(150);
+
+            Assert.That(pool.Current, Is.EqualTo(70), "A higher ceiling does not heal the character.");
+            Assert.That(pool.Max, Is.EqualTo(150));
+        }
+
+        [Test]
+        public void Pool_LoweringTheMaximumClampsTheCurrentValue()
+        {
+            var pool = new ResourcePool(100);
+
+            pool.SetMax(60);
+
+            Assert.That(pool.Max, Is.EqualTo(60));
+            Assert.That(pool.Current, Is.EqualTo(60), "A character cannot hold more than their ceiling.");
+            Assert.That(pool.Fraction, Is.EqualTo(1f));
+        }
+
+        [Test]
+        public void Pool_RejectsNegativeAmounts()
+        {
+            var pool = new ResourcePool(100);
+
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => pool.Spend(-1));
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => pool.Restore(-1));
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => pool.SetMax(-1));
+        }
+
+        [Test]
+        public void Pool_AStateReachesTheDisplayedCurrentValue()
+        {
+            var state = CreateState(Attributes(1, 10, 1, 1, 1, 1, 7));
+
+            state.Health.Spend(25);
+            state.Mana.Spend(8);
+
+            Assert.That(state.Health.Max, Is.EqualTo(70));
+            Assert.That(state.Health.Current, Is.EqualTo(45));
+            Assert.That(state.Health.Fraction, Is.EqualTo(45f / 70f).Within(0.0001f));
+
+            Assert.That(state.Mana.Max, Is.EqualTo(38));
+            Assert.That(state.Mana.Current, Is.EqualTo(30));
+        }
+
         // ---- Serialization ---------------------------------------------------
 
         [Test]
@@ -446,8 +546,12 @@ namespace SecondLife.Characters.Tests
                 "identity-description",
                 "identity-portrait-host",
                 // Attributes binder
-                "derived-max-health",
-                "derived-max-mana",
+                "derived-health-host",
+                "derived-mana-host",
+                // Header summary binder
+                "summary-health-host",
+                "summary-mana-host",
+                "summary-grade",
                 // Assessment binder
                 "assessment-capability-grade",
                 "assessment-guild-rank",
@@ -456,7 +560,13 @@ namespace SecondLife.Characters.Tests
                 "status-tab-attributes",
                 "status-tab-skills",
                 "status-page-attributes",
-                "status-page-skills"
+                "status-page-skills",
+                // Full-bleed regions
+                "status-header",
+                "status-content",
+                "status-footer",
+                "description-panel",
+                "tabs-panel"
             };
 
             foreach (var kind in AttributeKinds.All)

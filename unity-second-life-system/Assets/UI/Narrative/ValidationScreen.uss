@@ -5,54 +5,57 @@
     --control-hover: rgb(232, 223, 205);
     --control-active: rgb(197, 185, 162);
     --control-disabled: rgb(206, 199, 184);
+
+    --gap-edge: 24px;
 }
 
+/*
+ * Full-bleed surface, matching the status screen.
+ *
+ * This is the screen the player spends the most time on: a scenario is described,
+ * then the available actions are offered as buttons. Filling the screen gives the
+ * text room to breathe and keeps the button targets large at any resolution.
+ * A centred card would waste the sides and shrink the options.
+ */
 .narrative-root {
-    flex-grow: 1;
-    padding: 80px;
-}
-
-.narrative-panel {
     flex-grow: 1;
     flex-direction: column;
     background-color: var(--paper);
-    padding: 32px;
+    padding: var(--gap-edge);
+}
+
+/*
+ * The text takes the leftover height and the actions sit against the bottom, so
+ * the reading area never moves between passages of different length and the
+ * buttons stay where the player last clicked.
+ */
+.narrative-panel {
+    flex-grow: 1;
+    flex-direction: column;
+    padding: 24px;
 }
 
 .narrative-body {
     flex-grow: 1;
-    min-height: 240px;
-    font-size: 32px;
+    font-size: 30px;
     color: var(--ink);
     white-space: normal;
-}
-
-.narrative-status {
-    min-height: 48px;
-    margin-top: 16px;
-    font-size: 24px;
-    color: var(--ink);
-    white-space: normal;
+    line-height: 1.4;
 }
 
 .narrative-choices {
     flex-direction: column;
-    min-height: 160px;
-    margin-top: 16px;
-}
-
-.narrative-actions {
-    flex-direction: row;
-    margin-top: 16px;
+    flex-shrink: 0;
+    margin-top: 20px;
 }
 
 /*
- * Shared control surface. The transition lives on the base rule, not on :hover,
- * so the colour animates back out as well as in.
+ * Shared control surface. Navigation is click-only, so every option is a full-width
+ * button with a generous target and a visible hover and press state.
  */
 .narrative-action,
 .narrative-choice {
-    height: 52px;
+    height: 58px;
     font-size: 24px;
     color: var(--ink);
     background-color: var(--control);
@@ -73,6 +76,21 @@
 .narrative-action:disabled,
 .narrative-choice:disabled {
     background-color: var(--control-disabled);
+}
+
+.narrative-status {
+    flex-shrink: 0;
+    min-height: 32px;
+    margin-top: 16px;
+    font-size: 20px;
+    color: var(--ink);
+    white-space: normal;
+}
+
+.narrative-actions {
+    flex-shrink: 0;
+    flex-direction: row;
+    margin-top: 16px;
 }
 
 .narrative-action {

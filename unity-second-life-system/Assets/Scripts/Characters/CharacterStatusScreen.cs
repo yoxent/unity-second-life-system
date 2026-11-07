@@ -35,8 +35,12 @@ namespace SecondLife.Characters
         [Tooltip("Required. Template for the portrait frame, reused by other screens that show a face.")]
         [SerializeField] VisualTreeAsset portraitTemplate;
 
+        [Tooltip("Required. Template for one resource bar, reused by combat and party views.")]
+        [SerializeField] VisualTreeAsset resourceBarTemplate;
+
         CharacterState _state;
         StatusIdentityBinder _identity;
+        StatusSummaryBinder _summary;
         StatusAttributesBinder _attributes;
         StatusAssessmentBinder _assessment;
 
@@ -131,6 +135,14 @@ namespace SecondLife.Characters
                 return false;
             }
 
+            if (resourceBarTemplate == null)
+            {
+                Debug.LogError(
+                    $"{nameof(CharacterStatusScreen)} on '{name}' has no Resource Bar Template assigned. Assign ResourceBar.uxml in the inspector.",
+                    this);
+                return false;
+            }
+
             return true;
         }
 
@@ -150,9 +162,10 @@ namespace SecondLife.Characters
             }
 
             _identity = StatusIdentityBinder.Create(root, portraitTemplate, this);
-            _attributes = StatusAttributesBinder.Create(root, this);
+            _summary = StatusSummaryBinder.Create(root, resourceBarTemplate, this);
+            _attributes = StatusAttributesBinder.Create(root, resourceBarTemplate, this);
             _assessment = StatusAssessmentBinder.Create(root, titleTemplate, this);
-            if (_identity == null || _attributes == null || _assessment == null)
+            if (_identity == null || _summary == null || _attributes == null || _assessment == null)
             {
                 enabled = false;
                 return;
@@ -187,6 +200,7 @@ namespace SecondLife.Characters
             // The document is about to clear its contents, so nothing here may
             // outlive this call.
             _identity = null;
+            _summary = null;
             _attributes = null;
             _assessment = null;
             _attributesTab = null;
@@ -250,6 +264,7 @@ namespace SecondLife.Characters
         void Refresh()
         {
             _identity.Bind(_state.Profile.Identity);
+            _summary.Bind(_state);
             _attributes.Bind(_state);
 
             if (!_assessment.Bind(_state))

@@ -76,6 +76,28 @@ If a judgement call could go either way, prefer authored. The cost of adding a U
 - The controller exposes no public styling surface. Appearance changes go in USS.
 - The player-facing boundary follows `unity-core.mdc` section 5.
 
+### Screen framing
+
+Screens fill the viewport. This is a reading-heavy, button-driven game: the player is shown a described scene, offered options, and the chosen option leads to more text. The player never controls a character on screen, so the whole viewport is the interactive area.
+
+- The root is `flex-grow: 1` with edge padding only. No centred card, no `max-width`, no side margins that waste the interactive area.
+- The frame is a column that fills its parent.
+- Header and footer are fixed and always visible. The content band between them is the only flexible region, so a tab with different content never moves the header or footer.
+- Frequently-read values belong in the header, not behind a tab, because a tab change costs the player a navigation.
+- Button targets are the primary interaction. Give them generous height and a visible hover and pressed state.
+
+The rule and its reasoning are recorded in [DECISIONS/2026-11-07-full-screen-navigation-ui.md](../../../Projects/Docs/unity-second-life-system/Unity/unity-second-life-system/DECISIONS/2026-11-07-full-screen-navigation-ui.md).
+
+### Tabbed screens
+
+When a screen swaps between tabs or pages with `display: none`, the frame sizes itself to whichever page is in flow, so a page with less content shrinks the panel and moves the tab strip under the pointer.
+
+A screen whose frame is height-independent does not have this problem: a full-bleed frame with a flexible content band keeps one height whatever a tab contains. Prefer that. When a frame's height still follows its content:
+
+- Give the shared frame `min-height`, not `height`, so a taller page can still grow it.
+- Derive the value from the measured height of the richest page, and name it as a custom property with a comment explaining why.
+- Guard the invariant with a PlayMode test that switches tabs and compares the frame height. Layout values cannot be asserted from EditMode, which never builds a visual tree.
+
 ## 5. UI lifecycle and event handling
 
 - `UIDocument` builds its visual tree in its own `OnEnable`. Query in `Start`, not `OnEnable`: component order among scripts on one `GameObject` is not guaranteed, so an `OnEnable` query can see an empty tree.

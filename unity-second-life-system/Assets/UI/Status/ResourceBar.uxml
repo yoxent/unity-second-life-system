@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="resource-row" class="resource-row">
+        <ui:Label name="resource-label" class="resource-label" />
+        <ui:Label name="resource-value" class="resource-value" />
+        <ui:VisualElement name="resource-bar" class="resource-bar">
+            <ui:VisualElement name="resource-bar-fill" class="resource-bar-fill" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

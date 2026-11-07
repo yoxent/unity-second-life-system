@@ -4,8 +4,11 @@
     <ui:VisualElement name="narrative-root" class="narrative-root">
         <ui:VisualElement name="narrative-panel" class="narrative-panel">
             <ui:Label name="narrative-body" class="narrative-body" />
-            <ui:Label name="narrative-status" class="narrative-status" />
+
             <ui:VisualElement name="narrative-choices" class="narrative-choices" />
+
+            <ui:Label name="narrative-status" class="narrative-status" />
+
             <ui:VisualElement name="narrative-actions" class="narrative-actions">
                 <ui:Button name="narrative-save" class="narrative-action" text="Save" />
                 <ui:Button name="narrative-load" class="narrative-action narrative-action--load" text="Load" />
