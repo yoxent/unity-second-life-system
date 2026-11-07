@@ -97,4 +97,17 @@ Include the compliance status from `unity-core.mdc` section 3 whenever a standar
 
 Change `GDD.md`, `TECHNICAL_DESIGN.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, or a feature spec only when this change altered a rule, a boundary, a requirement, or the current state. A new architectural decision goes in `DECISIONS\` and into `TECHNICAL_DESIGN.md`. Do not write a document that only repeats the report.
 
+**A new or amended decision is a change to the current state, even when nothing shipped.** "Only when this change altered a rule" reads as "no" for a window that only wrote design, and that is how `PROJECT_CONTEXT.md` drifted twice in one window: three commits added decision and spec files and never touched it. An approved-but-unbuilt decision is exactly what a reader of the current state needs to know, and a pending inquiry is the same.
+
+`PROJECT_CONTEXT.md` therefore carries two checkable sections — an **approved, not implemented** list and an **open inquiries** table — and the docs repo enforces them with `Tools/check-context-drift.py`. Run it before calling a commit request done:
+
+```powershell
+cd E:\Projects\Docs\unity-second-life-system
+python Tools/check-context-drift.py
+```
+
+It fails when a decision marked approved-but-not-implemented is never named in `PROJECT_CONTEXT.md`, or when a spec describes an inquiry as open that the table does not list. It reports the count it detected, so a pass means it actually matched something rather than matching nothing.
+
+When an inquiry is answered and closed, remove its row and record the outcome under the entry it changed. Do not leave closed rows in the table.
+
 Keep documentation consistent with the actual implementation. Never describe a documented plan as a completed migration.
