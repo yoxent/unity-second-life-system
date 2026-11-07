@@ -137,5 +137,17 @@ Run these checks in addition to the standing conditions in `unity-core.mdc` sect
 - Event callbacks are registered and removed correctly.
 - Element queries happen after the tree exists and are cached.
 - The implementation follows the existing project architecture.
+- The console has been read for **warnings**, not only errors, after any UXML, USS, or TSS edit.
 
 A UI change is not complete when its C# compiles. Open the scene or prefab and confirm the referenced assets resolve. Report which scene or prefab was opened.
+
+### USS fails quietly, so the console is part of verification
+
+Unity reports an unsupported USS property as a **warning** and drops the declaration. The file still imports, the build still succeeds, and the element renders as if the rule were never written. A mistyped property, a CSS property USS does not implement, or a `calc()` expression therefore looks identical to working CSS until someone measures the pixels.
+
+This has already cost this project: `line-height` sat in three stylesheets, silently ignored, and was found only by accident during unrelated work.
+
+- After editing a stylesheet, read the console filtered to warnings. A clean compile is not evidence the styles were applied.
+- USS has no `calc()`. A sum must be a literal, and shared literals belong in `ValidationTheme.tss` rather than copied per screen.
+- USS implements roughly a hundred properties. When a style appears to do nothing, check the property name against Unity's USS property reference before hunting for a layout bug.
+- `StylesheetPropertyTests` (EditMode) guards the specific properties this project has reached for. It is a partial list, not a validator. Passing it does not mean a stylesheet is correct.

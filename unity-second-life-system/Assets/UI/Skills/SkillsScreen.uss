@@ -1,0 +1,136 @@
+/*
+ * Skills screen.
+ *
+ * Palette and the navigation inset come from the theme (ValidationTheme.tss), so
+ * this sheet declares only what is specific to this screen. Anything repeated
+ * here that the theme already defines is drift waiting to happen.
+ */
+.skills-root {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: var(--bg-page);
+    padding-left: var(--gap-edge-wide);
+    padding-right: var(--gap-edge-wide);
+    padding-top: var(--gap-edge-wide);
+
+    /* Clears the navigation bar, which overlays the viewport's bottom edge. The
+       value comes from the theme, so it stays tied to the bar's height. */
+    padding-bottom: var(--nav-inset-wide);
+}
+
+.skills-frame {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: var(--bg-panel);
+}
+
+.skills-header {
+    flex-direction: column;
+    flex-shrink: 0;
+    background-color: var(--bg-header);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--hairline);
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+.skills-heading {
+    font-size: 14px;
+    letter-spacing: 6px;
+    color: var(--accent-dim);
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.skills-caption {
+    font-size: 15px;
+    color: var(--ink-muted);
+}
+
+/* ---- Content: the tree and the list share the flexible band ---- */
+
+.skills-content {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: stretch;
+    padding: var(--gap-block);
+}
+
+.content-panel {
+    flex-direction: column;
+    background-color: var(--bg-panel-raised);
+    border-radius: var(--radius-panel);
+    padding: 20px;
+}
+
+/*
+ * The tree gets more room than the list. A skill tree branches, so it needs
+ * horizontal space to stay readable; the list is a column of rows and reads fine
+ * narrower. Both stretch to the band's height so neither collapses on an empty
+ * screen.
+ */
+.content-panel--tree {
+    flex-grow: 3;
+    flex-basis: 0;
+    margin-right: var(--gap-block);
+}
+
+.content-panel--list {
+    flex-grow: 2;
+    flex-basis: 0;
+}
+
+.skills-section-heading {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--ink-muted);
+    -unity-font-style: bold;
+    margin-bottom: 12px;
+}
+
+.skills-tree {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.skills-list {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+/*
+ * An empty state is a real state, not a placeholder. Both regions say what would
+ * fill them and why nothing does, so an empty screen does not read as a bug.
+ */
+.skills-empty {
+    font-size: 16px;
+    color: var(--ink-faint);
+    white-space: normal;
+    max-width: 520px;
+    -unity-text-align: middle-center;
+
+    /* USS has no line-height. Paragraph spacing is the supported equivalent. */
+    -unity-paragraph-spacing: 6px;
+}
+
+.skills-footer {
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    border-top-width: 1px;
+    border-top-color: var(--hairline);
+    background-color: var(--bg-header);
+    padding-left: 24px;
+    padding-right: 24px;
+    height: 40px;
+}
+
+.skills-footer-hint {
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 1px;
+}

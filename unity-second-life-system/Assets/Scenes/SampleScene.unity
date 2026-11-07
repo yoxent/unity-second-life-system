@@ -119,6 +119,119 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &107912697
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 107912700}
+  - component: {fileID: 107912699}
+  - component: {fileID: 107912698}
+  m_Layer: 0
+  m_Name: Navigation Bar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &107912698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 107912697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b03cdbe120a6f2b4dbf4c6b9cfba1995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SecondLife.UI::SecondLife.UI.NavigationBar
+  document: {fileID: 107912699}
+  router: {fileID: 233418637}
+  groupTemplate: {fileID: 9197481963319205126, guid: 0b739a0ea6d8fef4ead0e398a5ab6f8e, type: 3}
+  itemTemplate: {fileID: 9197481963319205126, guid: 9473524d5b2b25943b6f86a1a47365f4, type: 3}
+  groups:
+  - label: World
+    destinations:
+    - screenId: world-map
+      label: World Map
+    - screenId: dungeon
+      label: Dungeon
+    - screenId: raid
+      label: Raid
+    - screenId: academy
+      label: Academy
+  - label: Character
+    destinations:
+    - screenId: status
+      label: Status
+    - screenId: skills
+      label: Skills
+    - screenId: inventory
+      label: Inventory
+  - label: Journal
+    destinations:
+    - screenId: quests
+      label: Quests
+    - screenId: achievements
+      label: Achievements
+    - screenId: masters
+      label: Masters
+  - label: Production
+    destinations:
+    - screenId: gathering
+      label: Gathering
+    - screenId: crafting
+      label: Crafting
+  - label: Shop
+    destinations:
+    - screenId: shop
+      label: Shop
+    - screenId: auction-house
+      label: Auction House
+    - screenId: item-mall
+      label: Item Mall
+--- !u!114 &107912699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 107912697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 53a04880b7963d14eb43d9603c393e27, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 9b33377b05c57ea41b34779e98db214b, type: 3}
+  m_SortingOrder: 10
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &107912700
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 107912697}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &233418636
 GameObject:
   m_ObjectHideFlags: 0
@@ -153,6 +266,8 @@ MonoBehaviour:
     document: {fileID: 1014518976}
   - id: narrative
     document: {fileID: 880001004}
+  - id: skills
+    document: {fileID: 1726135318}
   initialScreen: status
 --- !u!4 &233418638
 Transform:
@@ -535,6 +650,75 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1726135316
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1726135319}
+  - component: {fileID: 1726135318}
+  - component: {fileID: 1726135317}
+  m_Layer: 0
+  m_Name: Skills Screen
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1726135317
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1726135316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc14a2614ce5544583d7e8ea4aa2630, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SecondLife.Characters::SecondLife.Characters.SkillsScreen
+  document: {fileID: 1726135318}
+--- !u!114 &1726135318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1726135316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 53a04880b7963d14eb43d9603c393e27, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 6017a094ae9652f4e90713db20d89a85, type: 3}
+  m_SortingOrder: 1
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &1726135319
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1726135316}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -544,3 +728,5 @@ SceneRoots:
   - {fileID: 880001002}
   - {fileID: 1014518977}
   - {fileID: 233418638}
+  - {fileID: 107912700}
+  - {fileID: 1726135319}

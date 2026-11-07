@@ -40,6 +40,17 @@ namespace SecondLife.UI
         [Tooltip("Id of the screen shown on load. Must match one entry above.")]
         [SerializeField] string initialScreen = string.Empty;
 
+        /// <summary>
+        /// Raised after the visible screen changes, with the id now showing, or an
+        /// empty string when every screen is hidden. Lets a listener such as the
+        /// navigation bar mark the current destination without polling or querying
+        /// each document's display state.
+        /// </summary>
+        public event Action<string> Changed;
+
+        /// <summary>The id of the screen currently shown, or an empty string.</summary>
+        public string CurrentScreen { get; private set; } = string.Empty;
+
         void Start()
         {
             // Start, not Awake or OnEnable: each UIDocument builds its tree in its
@@ -73,6 +84,28 @@ namespace SecondLife.UI
 
             foreach (var screen in screens)
                 SetVisible(screen.Document, screen.Id == id);
+
+            SetCurrent(id);
+        }
+
+        /// <summary>
+        /// Whether a screen with this id exists. For callers that must present a
+        /// destination before they know it is reachable, such as a navigation bar
+        /// disabling the parts of the game that are not built yet. <see cref="Show"/>
+        /// still validates on its own, so this is a read, not a reservation.
+        /// </summary>
+        public bool HasScreen(string id)
+        {
+            if (screens == null)
+                return false;
+
+            foreach (var screen in screens)
+            {
+                if (screen.Id == id)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>Hides every screen. Used when no screen should be shown.</summary>
@@ -83,6 +116,21 @@ namespace SecondLife.UI
 
             foreach (var screen in screens)
                 SetVisible(screen.Document, false);
+
+            SetCurrent(string.Empty);
+        }
+
+        /// <summary>
+        /// Records the visible id and notifies listeners. Guarded against a repeat
+        /// of the same id, so a listener that redraws is not woken by a no-op Show.
+        /// </summary>
+        void SetCurrent(string id)
+        {
+            if (CurrentScreen == id)
+                return;
+
+            CurrentScreen = id;
+            Changed?.Invoke(id);
         }
 
         static void SetVisible(UIDocument document, bool visible)
@@ -151,17 +199,6 @@ namespace SecondLife.UI
             }
 
             return count;
-        }
-
-        bool HasScreen(string id)
-        {
-            foreach (var screen in screens)
-            {
-                if (screen.Id == id)
-                    return true;
-            }
-
-            return false;
         }
 
         string KnownIds()

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Skills/SkillsScreen.uss?fileID=7433441132597879392&amp;guid=cd747eada45a5d0479520fcfb2ed46ff&amp;type=3#SkillsScreen" />
+    <!--
+      Skills as its own destination, not a tab on the character sheet.
+
+      The screen is deliberately mostly empty because the skill model does not exist
+      yet, not because a decision is missing. SKL-002 is closed and confirmed: a
+      skill holds one 0-100 learning-completion value, and 100 means the full
+      intended effect is learned with no separate mastery tier. So the list row and
+      the tree can both be built against a single progress value whenever the model
+      lands. Until then this authors the regions the panel needs and states plainly
+      that there is nothing to show, rather than presenting placeholder rows that
+      would be mistaken for real data.
+    -->
+    <ui:VisualElement name="skills-root" class="skills-root">
+        <ui:VisualElement name="skills-frame" class="skills-frame">
+
+            <ui:VisualElement name="skills-header" class="skills-header">
+                <ui:Label name="skills-heading" class="skills-heading" text="SKILLS" />
+                <ui:Label name="skills-caption" class="skills-caption" text="What the System has recorded." />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="skills-content" class="skills-content">
+                <ui:VisualElement name="skills-tree-panel" class="content-panel content-panel--tree">
+                    <ui:Label name="skills-tree-heading" class="skills-section-heading" text="SKILL TREE" />
+                    <ui:VisualElement name="skills-tree" class="skills-tree">
+                        <ui:Label name="skills-tree-empty" class="skills-empty" text="No tree to draw yet. The tree is built from recorded skills, and none are recorded." />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="skills-list-panel" class="content-panel content-panel--list">
+                    <ui:Label name="skills-list-heading" class="skills-section-heading" text="RECORDED" />
+                    <ui:VisualElement name="skills-list" class="skills-list">
+                        <ui:Label name="skills-list-empty" class="skills-empty" text="No skills are recorded yet. A skill is learned from a teacher, a book, a trial, practice, experience, or a resource. Learning is not mastery." />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="skills-footer" class="skills-footer">
+                <ui:Label name="skills-footer-hint" class="skills-footer-hint" text="A completed learning bar means the skill is known, not that it is finished." />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

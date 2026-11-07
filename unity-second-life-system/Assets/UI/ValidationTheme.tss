@@ -1,1 +1,59 @@
 @import url("unity-theme://default");
+
+/*
+ * Project theme. Every document on ValidationPanelSettings inherits these
+ * declarations, so this file is the one place a shared value is written.
+ *
+ * Why this exists: USS has no calc(), which was verified against the importer on
+ * 2026-11-07 ("Unknown function 'calc'"). Without it, a screen cannot express
+ * "the navigation bar's height plus my own edge gap" and stay in sync with the
+ * bar. Writing that sum into each screen by hand is what drifted before.
+ *
+ * The theme cannot do arithmetic either. What it can do is hold the value that
+ * the components are derived FROM, so the sum is written once here rather than
+ * once per screen.
+ */
+:root {
+    /* ---- Palette ---- */
+    --bg-page: rgb(9, 11, 17);
+    --bg-panel: rgb(18, 22, 32);
+    --bg-panel-raised: rgb(24, 29, 41);
+    --bg-header: rgb(14, 17, 26);
+    --bg-portrait: rgb(13, 16, 24);
+    --border-portrait: rgb(58, 76, 102);
+    --portrait-placeholder: rgb(72, 86, 108);
+    --accent: rgb(126, 176, 214);
+    --accent-dim: rgb(64, 96, 124);
+    --ink: rgb(238, 240, 246);
+    --ink-soft: rgb(186, 194, 210);
+    --ink-meta: rgb(200, 208, 222);
+    --ink-description: rgb(146, 158, 178);
+    --ink-muted: rgb(122, 134, 154);
+    --ink-faint: rgb(96, 106, 124);
+    --hairline: rgb(38, 46, 62);
+    --transparent: rgba(0, 0, 0, 0);
+
+    --bar-track: rgb(30, 37, 51);
+    --bar-health: rgb(196, 88, 84);
+    --bar-mana: rgb(92, 138, 206);
+
+    /* ---- Navigation bar metrics ---- */
+    /* The bar's own height. NavigationBar.uss reads this. */
+    --nav-height: 62px;
+
+    /*
+     * The two reserved-inset values, one per edge gap, so a change to --nav-height
+     * is made here once and both screens follow.
+     *
+     * These are the only place the 28px and 24px edge gaps are expressed as a sum.
+     * A third gap means a third token; that is the cost of no calc().
+     */
+    --nav-inset-wide: 90px;   /* 62 bar + 28 edge gap: status, skills */
+    --nav-inset-narrow: 86px; /* 62 bar + 24 edge gap: narrative */
+
+    /* ---- Shared spacing ---- */
+    --gap-edge-wide: 28px;
+    --gap-edge-narrow: 24px;
+    --gap-block: 20px;
+    --radius-panel: 6px;
+}

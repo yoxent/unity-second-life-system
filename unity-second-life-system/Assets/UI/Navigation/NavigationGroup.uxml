@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <!--
+      One navigation group: the main button and the flyout it opens.
+
+      The flyout is a child of this container, not a sibling of it. That is what
+      lets the pointer travel from the button into the flyout without leaving the
+      group, so the flyout does not shut as it is crossed. The visual gap between
+      button and panel is padding inside nav-group-flyout, not a margin, because a
+      margin would be dead space the pointer can leave through; padding is part of
+      the element's hittable rectangle.
+
+      The caret in the label points up because the flyout opens upward from the
+      bottom bar. The controller appends it.
+    -->
+    <ui:VisualElement name="nav-group" class="nav-group">
+        <!-- Padding here belongs to the group, so the gap above the button is still
+             inside the hover region rather than a hole in it. -->
+        <ui:VisualElement name="nav-group-flyout" class="nav-group-flyout">
+            <ui:VisualElement name="nav-group-panel" class="nav-group-panel">
+                <ui:VisualElement name="nav-group-items" class="nav-group-items" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:Button name="nav-group-button" class="nav-group-button" text="Group  ^" />
+    </ui:VisualElement>
+</ui:UXML>

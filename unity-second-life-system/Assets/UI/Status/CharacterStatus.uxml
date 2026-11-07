@@ -50,83 +50,76 @@
                     <ui:Label name="identity-description" class="identity-description" />
                 </ui:VisualElement>
 
+                <!--
+                  Attributes and vitals. This used to be one page of a two-tab strip;
+                  Skills is a destination on the navigation bar now, so the strip had a
+                  single tab left and was removed rather than kept as decoration.
+                -->
                 <ui:VisualElement name="tabs-panel" class="content-panel content-panel--tabs">
-                    <ui:VisualElement name="status-tabs" class="status-tabs">
-                        <ui:Button name="status-tab-attributes" class="status-tab status-tab--active" text="Attributes" />
-                        <ui:Button name="status-tab-skills" class="status-tab" text="Skills" />
-                    </ui:VisualElement>
+                    <ui:VisualElement name="status-body" class="status-body">
+                        <ui:VisualElement name="status-attributes" class="status-column status-attributes">
+                            <ui:Label name="attributes-heading" class="status-section-heading" text="ATTRIBUTES" />
 
-                    <ui:VisualElement name="status-page-attributes" class="status-page">
-                        <ui:VisualElement name="status-body" class="status-body">
-                            <ui:VisualElement name="status-attributes" class="status-column status-attributes">
-                                <ui:Label name="attributes-heading" class="status-section-heading" text="ATTRIBUTES" />
-
-                                <ui:VisualElement name="attribute-row-strength" class="attribute-row">
-                                    <ui:Label name="attribute-label-str" class="attribute-label" text="STR" />
-                                    <ui:Label name="attribute-strength" class="attribute-value" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="attribute-row-vitality" class="attribute-row">
-                                    <ui:Label name="attribute-label-vit" class="attribute-label" text="VIT" />
-                                    <ui:Label name="attribute-vitality" class="attribute-value" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="attribute-row-agility" class="attribute-row">
-                                    <ui:Label name="attribute-label-agi" class="attribute-label" text="AGI" />
-                                    <ui:Label name="attribute-agility" class="attribute-value" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="attribute-row-dexterity" class="attribute-row">
-                                    <ui:Label name="attribute-label-dex" class="attribute-label" text="DEX" />
-                                    <ui:Label name="attribute-dexterity" class="attribute-value" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="attribute-row-intelligence" class="attribute-row">
-                                    <ui:Label name="attribute-label-int" class="attribute-label" text="INT" />
-                                    <ui:Label name="attribute-intelligence" class="attribute-value" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="attribute-row-wisdom" class="attribute-row">
-                                    <ui:Label name="attribute-label-wis" class="attribute-label" text="WIS" />
-                                    <ui:Label name="attribute-wisdom" class="attribute-value" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="attribute-row-spirit" class="attribute-row">
-                                    <ui:Label name="attribute-label-spi" class="attribute-label" text="SPI" />
-                                    <ui:Label name="attribute-spirit" class="attribute-value" />
-                                </ui:VisualElement>
+                            <ui:VisualElement name="attribute-row-strength" class="attribute-row">
+                                <ui:Label name="attribute-label-str" class="attribute-label" text="STR" />
+                                <ui:Label name="attribute-strength" class="attribute-value" />
                             </ui:VisualElement>
-
-                            <ui:VisualElement name="status-derived" class="status-column status-derived">
-                                <ui:Label name="derived-heading" class="status-section-heading" text="VITALS" />
-
-                                <ui:VisualElement name="derived-health-host" class="derived-bar-host" />
-                                <ui:VisualElement name="derived-mana-host" class="derived-bar-host" />
-
-                                <ui:Label name="derived-footnote" class="status-footnote" text="Shown as the System presents them. The world does not measure people this way." />
-
-                                <ui:VisualElement name="status-assessment" class="status-assessment">
-                                    <ui:Label name="assessment-heading" class="status-section-heading" text="ASSESSMENT" />
-
-                                    <ui:VisualElement name="assessment-row-capability-grade" class="assessment-row">
-                                        <ui:Label name="assessment-label-capability-grade" class="assessment-label" text="Capability grade" />
-                                        <ui:Label name="assessment-capability-grade" class="assessment-value" />
-                                    </ui:VisualElement>
-                                    <ui:VisualElement name="assessment-row-guild-rank" class="assessment-row">
-                                        <ui:Label name="assessment-label-guild-rank" class="assessment-label" text="Guild rank" />
-                                        <ui:Label name="assessment-guild-rank" class="assessment-value" />
-                                    </ui:VisualElement>
-
-                                    <ui:Label name="assessment-label-titles" class="assessment-label assessment-label--titles" text="TITLES" />
-                                    <ui:VisualElement name="assessment-titles" class="status-titles" />
-                                </ui:VisualElement>
+                            <ui:VisualElement name="attribute-row-vitality" class="attribute-row">
+                                <ui:Label name="attribute-label-vit" class="attribute-label" text="VIT" />
+                                <ui:Label name="attribute-vitality" class="attribute-value" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="attribute-row-agility" class="attribute-row">
+                                <ui:Label name="attribute-label-agi" class="attribute-label" text="AGI" />
+                                <ui:Label name="attribute-agility" class="attribute-value" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="attribute-row-dexterity" class="attribute-row">
+                                <ui:Label name="attribute-label-dex" class="attribute-label" text="DEX" />
+                                <ui:Label name="attribute-dexterity" class="attribute-value" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="attribute-row-intelligence" class="attribute-row">
+                                <ui:Label name="attribute-label-int" class="attribute-label" text="INT" />
+                                <ui:Label name="attribute-intelligence" class="attribute-value" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="attribute-row-wisdom" class="attribute-row">
+                                <ui:Label name="attribute-label-wis" class="attribute-label" text="WIS" />
+                                <ui:Label name="attribute-wisdom" class="attribute-value" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="attribute-row-spirit" class="attribute-row">
+                                <ui:Label name="attribute-label-spi" class="attribute-label" text="SPI" />
+                                <ui:Label name="attribute-spirit" class="attribute-value" />
                             </ui:VisualElement>
                         </ui:VisualElement>
-                    </ui:VisualElement>
 
-                    <ui:VisualElement name="status-page-skills" class="status-page status-page--hidden">
-                        <ui:Label name="skills-heading" class="status-section-heading" text="SKILLS" />
-                        <ui:Label name="skills-empty" class="status-footnote" text="No skills are recorded yet. A skill is learned when its learning process is complete, and the System has no skill list to show until one is learned." />
+                        <ui:VisualElement name="status-derived" class="status-column status-derived">
+                            <ui:Label name="derived-heading" class="status-section-heading" text="VITALS" />
+
+                            <ui:VisualElement name="derived-health-host" class="derived-bar-host" />
+                            <ui:VisualElement name="derived-mana-host" class="derived-bar-host" />
+
+                            <ui:Label name="derived-footnote" class="status-footnote" text="Shown as the System presents them. The world does not measure people this way." />
+
+                            <ui:VisualElement name="status-assessment" class="status-assessment">
+                                <ui:Label name="assessment-heading" class="status-section-heading" text="ASSESSMENT" />
+
+                                <ui:VisualElement name="assessment-row-capability-grade" class="assessment-row">
+                                    <ui:Label name="assessment-label-capability-grade" class="assessment-label" text="Capability grade" />
+                                    <ui:Label name="assessment-capability-grade" class="assessment-value" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="assessment-row-guild-rank" class="assessment-row">
+                                    <ui:Label name="assessment-label-guild-rank" class="assessment-label" text="Guild rank" />
+                                    <ui:Label name="assessment-guild-rank" class="assessment-value" />
+                                </ui:VisualElement>
+
+                                <ui:Label name="assessment-label-titles" class="assessment-label assessment-label--titles" text="TITLES" />
+                                <ui:VisualElement name="assessment-titles" class="status-titles" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
 
             <ui:VisualElement name="status-footer" class="status-footer">
-                <ui:Label name="status-footer-hint" class="status-footer-hint" text="Select a tab to change section." />
+                <ui:Label name="status-footer-hint" class="status-footer-hint" text="Skills and inventory have their own screens. Open them from the bar below." />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

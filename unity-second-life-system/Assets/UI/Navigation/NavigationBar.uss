@@ -1,0 +1,227 @@
+:root {
+    /*
+     * Palette comes from ValidationTheme.tss. Only bar-specific metrics are
+     * declared here.
+     *
+     * --nav-height is the single source for the bar's height. The theme derives
+     * the screens' reserved insets from it, so this value and the space each
+     * screen leaves for the bar are stated once each, not once per screen.
+     */
+    --nav-gap: 6px;
+    --nav-radius: 6px;
+
+    /* Named aliases so the rules below read in bar terms, and so the disabled and
+       hover tones are not literals scattered through the sheet. */
+    --nav-bg: var(--bg-header);
+    --nav-panel: var(--bg-panel-raised);
+    --nav-hairline: var(--hairline);
+    --nav-accent: var(--accent);
+    --nav-accent-dim: var(--accent-dim);
+    --nav-ink: var(--ink);
+    --nav-ink-muted: var(--ink-muted);
+    --nav-disabled: rgb(74, 84, 100);
+    --nav-hover: rgb(33, 40, 55);
+    --nav-transparent: var(--transparent);
+}
+
+/*
+ * Pinned to the bottom edge and sized by its content, so it overlays the screen
+ * instead of taking layout space from it. The element itself ignores picks: it
+ * spans the viewport width, and without that it would swallow clicks aimed at
+ * the screen below. Children opt back in by default.
+ */
+.nav-root {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.nav-bar {
+    flex-shrink: 0;
+    height: var(--nav-height);
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    background-color: var(--nav-bg);
+    border-top-width: 1px;
+    border-top-color: var(--nav-hairline);
+}
+
+.nav-groups {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+}
+
+/*
+ * The group is the hover region, not the button. The flyout is its child, so the
+ * pointer travelling from the button up into the panel never leaves the group
+ * and the flyout cannot flicker shut on the way. Relative positioning is what
+ * lets the flyout be placed against this group's top edge.
+ *
+ * Height is stated rather than inherited from align-items: stretch, which did
+ * not hold here: the group collapsed to its button's content height and left a
+ * strip of dead bar above it. The button then fills the group with flex-grow.
+ */
+.nav-group {
+    position: relative;
+    height: var(--nav-height);
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
+}
+
+/*
+ * Hidden by default. The upward gap is bottom padding, not a margin: padding is
+ * part of the element's hittable area, so the pointer crosses the space between
+ * button and panel without falling out of the group. A margin would leave a hole
+ * that closes the flyout mid-travel.
+ */
+.nav-group-flyout {
+    display: none;
+    position: absolute;
+    left: 0;
+    bottom: 100%;
+    padding-bottom: var(--nav-gap);
+}
+
+.nav-group--open .nav-group-flyout {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-group-panel {
+    min-width: 208px;
+    flex-direction: column;
+    background-color: var(--nav-panel);
+    border-width: 1px;
+    border-color: var(--nav-hairline);
+    border-radius: var(--nav-radius);
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.nav-group-items {
+    flex-direction: column;
+}
+
+/*
+ * Navigation is the primary interaction in this game, so the group target is
+ * tall and wide with an unmistakable open state. The underline matches the
+ * status screen's active tab, so "this section is open" reads the same on both.
+ */
+.nav-group-button {
+    flex-grow: 1;
+    min-width: 132px;
+    padding-left: 20px;
+    padding-right: 20px;
+    font-size: 16px;
+    color: var(--nav-ink-muted);
+    background-color: var(--nav-transparent);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 2px;
+    border-bottom-color: var(--nav-transparent);
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    transition-property: color, background-color, border-bottom-color;
+    transition-duration: 0.12s;
+}
+
+.nav-group-button:hover {
+    color: var(--nav-ink);
+    background-color: var(--nav-hover);
+}
+
+.nav-group-button:active {
+    color: var(--nav-accent);
+}
+
+.nav-group--open .nav-group-button {
+    color: var(--nav-accent);
+    background-color: var(--nav-hover);
+    border-bottom-color: var(--nav-accent);
+}
+
+.nav-item {
+    height: 42px;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-left: 14px;
+    padding-right: 14px;
+    font-size: 15px;
+    color: var(--nav-ink);
+    background-color: var(--nav-transparent);
+    border-width: 0;
+    border-radius: 4px;
+    -unity-text-align: middle-left;
+    transition-property: background-color, color;
+    transition-duration: 0.12s;
+}
+
+.nav-item:hover {
+    background-color: var(--nav-hover);
+    color: var(--nav-ink);
+}
+
+.nav-item:active {
+    color: var(--nav-accent);
+}
+
+/*
+ * A destination with no screen behind it. Dimmed rather than hidden, so the bar
+ * still shows the shape of the game and an unbuilt section reads as absent
+ * instead of as missing. The disabled state is set from the router's screen
+ * list, not from a hand-kept flag.
+ */
+.nav-item:disabled {
+    color: var(--nav-disabled);
+}
+
+.nav-item:disabled:hover {
+    background-color: var(--nav-transparent);
+    color: var(--nav-disabled);
+}
+
+/*
+ * The destination the player is currently on.
+ *
+ * The bar used to show only where you could go, never where you were, so every
+ * group read as equally inactive. This is the missing "you are here".
+ */
+.nav-item--current {
+    color: var(--nav-accent);
+    -unity-font-style: bold;
+    background-color: rgba(126, 176, 214, 0.08);
+}
+
+/*
+ * Keyboard and gamepad focus.
+ *
+ * UI Toolkit controls are focusable by default and the project has no pointer-only
+ * input guarantee, so without this a controller press moves an invisible cursor and
+ * the player cannot tell which button is armed. The ring is drawn with an outline
+ * of a different width than any border, so it is visible on the group buttons, the
+ * flyout items, and the flat screen buttons alike.
+ *
+ * :focus is separate from :hover on purpose. Hover is the mouse's preview; focus is
+ * what the keyboard is pointing at, and they can disagree.
+ */
+.nav-group-button:focus,
+.nav-item:focus {
+    color: var(--nav-accent);
+    border-top-width: 0;
+    border-bottom-width: 2px;
+    border-bottom-color: var(--nav-accent);
+}
+
+.nav-item:focus {
+    background-color: var(--nav-hover);
+    border-bottom-width: 0;
+    border-left-width: 2px;
+    border-left-color: var(--nav-accent);
+}

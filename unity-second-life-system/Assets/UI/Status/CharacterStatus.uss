@@ -1,31 +1,17 @@
 :root {
-    --bg-page: rgb(9, 11, 17);
-    --bg-panel: rgb(18, 22, 32);
-    --bg-panel-raised: rgb(24, 29, 41);
-    --bg-header: rgb(14, 17, 26);
-    --bg-portrait: rgb(13, 16, 24);
-    --border-portrait: rgb(58, 76, 102);
-    --portrait-placeholder: rgb(72, 86, 108);
-    --accent: rgb(126, 176, 214);
-    --accent-dim: rgb(64, 96, 124);
-    --ink: rgb(238, 240, 246);
-    --ink-soft: rgb(186, 194, 210);
-    --ink-meta: rgb(200, 208, 222);
-    --ink-description: rgb(146, 158, 178);
-    --ink-muted: rgb(122, 134, 154);
-    --ink-faint: rgb(96, 106, 124);
-    --hairline: rgb(38, 46, 62);
-    --transparent: rgba(0, 0, 0, 0);
-
-    /* Resource bars. Health and mana are distinguished by colour as well as by
-       their label, because a bar is read at a glance rather than read out. */
-    --bar-track: rgb(30, 37, 51);
-    --bar-health: rgb(196, 88, 84);
-    --bar-mana: rgb(92, 138, 206);
-
+    /*
+     * Palette, spacing, and the navigation inset live in ValidationTheme.tss.
+     * Only what is specific to this screen is declared here.
+     *
+     * This screen used to repeat the whole palette. That copy and the bar's copy
+     * were two files that had to be edited together, which is exactly the drift
+     * the theme removes.
+     */
     --gap-edge: 28px;
-    --gap-block: 20px;
-    --radius-panel: 6px;
+
+    /* From the theme, so this screen's reserved bar height stays tied to the
+       bar's own height rather than to a number copied into this file. */
+    --nav-inset: var(--nav-inset-wide);
 }
 
 /*
@@ -43,7 +29,11 @@
     padding-left: var(--gap-edge);
     padding-right: var(--gap-edge);
     padding-top: var(--gap-edge);
-    padding-bottom: var(--gap-edge);
+
+    /* The navigation bar overlays the bottom of the viewport. Screens reserve its
+       height so the footer stays visible and clickable instead of sitting under
+       it. */
+    padding-bottom: var(--nav-inset);
 }
 
 /*
@@ -233,7 +223,10 @@
     color: var(--ink-description);
     white-space: normal;
     -unity-font-style: italic;
-    line-height: 1.45;
+
+    /* line-height is not a USS property and was silently ignored here. Paragraph
+       spacing is the supported equivalent for a wrapped text block. */
+    -unity-paragraph-spacing: 5px;
 }
 
 .status-section-heading {
@@ -242,60 +235,6 @@
     color: var(--ink-muted);
     -unity-font-style: bold;
     margin-bottom: 12px;
-}
-
-/* ---- Tabs ---- */
-
-.status-tabs {
-    flex-direction: row;
-    flex-shrink: 0;
-    border-bottom-width: 1px;
-    border-bottom-color: var(--hairline);
-    margin-bottom: 18px;
-}
-
-/*
- * Button targets are the primary interaction. Each tab is wide enough to hit
- * comfortably and shows a visible focus band, because navigation is click-only.
- */
-.status-tab {
-    height: 44px;
-    padding-left: 28px;
-    padding-right: 28px;
-    font-size: 16px;
-    color: var(--ink-muted);
-    background-color: var(--transparent);
-    border-left-width: 0;
-    border-right-width: 0;
-    border-top-width: 0;
-    border-bottom-width: 2px;
-    border-bottom-color: var(--transparent);
-    -unity-font-style: bold;
-    letter-spacing: 1px;
-    transition-property: color, border-bottom-color;
-    transition-duration: 0.12s;
-}
-
-.status-tab:hover {
-    color: var(--ink);
-}
-
-.status-tab:active {
-    color: var(--accent);
-}
-
-.status-tab--active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-}
-
-.status-page {
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.status-page--hidden {
-    display: none;
 }
 
 /* ---- Attributes and derived, side by side and filling the panel ---- */
@@ -368,7 +307,9 @@
     color: var(--ink-faint);
     white-space: normal;
     margin-top: 12px;
-    line-height: 1.4;
+
+    /* Was line-height: 1.4, which USS ignores. */
+    -unity-paragraph-spacing: 5px;
 }
 
 /* ---- Assessment ---- */

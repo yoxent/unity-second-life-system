@@ -87,41 +87,62 @@ namespace SecondLife.Characters.PlayModeTests
         }
 
         [UnityTest]
-        public IEnumerator StatusScreen_TabsStillRespondAfterReenable()
+        public IEnumerator StatusScreen_HasNoTabStripAfterSkillsMovedOut()
         {
             yield return LoadScene();
 
-            var screen = FindStatusScreen();
-            var document = screen.GetComponent<UIDocument>();
+            var document = FindStatusScreen().GetComponent<UIDocument>();
+            var root = document.rootVisualElement;
 
-            // Preconditions are read before the cycle, but only to prove the screen
-            // was in a sane state to begin with.
-            var attributesPage = AssertElement(document, "status-page-attributes");
-            var skillsPage = AssertElement(document, "status-page-skills");
+            // Skills became a navigation destination, so the character sheet has no
+            // tabs left. Keeping a one-tab strip would be decoration that implies a
+            // choice the player does not have. This guards against the tab being
+            // reintroduced as part of a later screen.
+            Assert.That(root.Q<VisualElement>("status-tabs"), Is.Null,
+                "The status screen still has a tab strip. Skills moved to its own screen, " +
+                "so the strip has nothing left to switch between.");
+            Assert.That(root.Q<Button>("status-tab-skills"), Is.Null,
+                "The status screen still has a Skills tab. It duplicates the bar's destination " +
+                "and gives one section two owners.");
 
-            Assert.That(attributesPage.ClassListContains("status-page--hidden"), Is.False,
-                "Precondition: the attributes page is visible on open.");
-            Assert.That(skillsPage.ClassListContains("status-page--hidden"), Is.True,
-                "Precondition: the skills page is hidden on open.");
+            // The content the tab used to hide must still be present and showing.
+            var body = AssertElement(document, "status-body");
+            Assert.That(body, Is.Not.Null);
+            Assert.That(body.resolvedStyle.display, Is.Not.EqualTo(DisplayStyle.None),
+                "The attributes content is not visible now that the tab strip is gone.");
+        }
 
+        [UnityTest]
+        public IEnumerator SkillsScreen_RendersAndSurvivesDisableAndReenable()
+        {
+            yield return LoadScene();
+
+            var router = Object.FindFirstObjectByType<SecondLife.UI.ScreenRouter>();
+            Assert.That(router, Is.Not.Null);
+            Assert.That(router.HasScreen("skills"), Is.True,
+                "The router does not know the skills screen, so the bar's Skills button is dead.");
+
+            var document = FindDocument("Skills Screen");
+            Assert.That(document, Is.Not.Null, "'Skills Screen' must carry a UIDocument.");
+
+            router.Show("skills");
+            yield return null;
+            yield return null;
+
+            var before = AssertLabel(document, "skills-list-empty").text;
+            Assert.That(before, Is.Not.Empty, "The skills screen rendered an empty state with no text.");
+
+            // The cycle that has broken presenters in this project twice.
             document.gameObject.SetActive(false);
             yield return null;
             document.gameObject.SetActive(true);
             yield return null;
 
-            // Re-query: UIDocument rebuilds the tree, so the element references held
-            // from before the cycle point at discarded instances. Asserting on those
-            // would report a controller bug that is really a stale test reference.
-            var skillsTab = AssertButton(document, "status-tab-skills");
-            InvokeHandlers(skillsTab);
-
-            var skillsPageAfter = AssertElement(document, "status-page-skills");
-            var attributesPageAfter = AssertElement(document, "status-page-attributes");
-
-            Assert.That(skillsPageAfter.ClassListContains("status-page--hidden"), Is.False,
-                "The skills page did not open after a re-enable. The tab handler was not re-registered.");
-            Assert.That(attributesPageAfter.ClassListContains("status-page--hidden"), Is.True,
-                "The attributes page stayed visible after switching to skills on a re-enabled screen.");
+            // Re-query, because the tree was rebuilt.
+            var after = AssertLabel(document, "skills-list-empty").text;
+            Assert.That(after, Is.EqualTo(before),
+                "The skills screen lost its content across a disable/enable cycle. " +
+                "It is holding references into a discarded tree.");
         }
 
         [UnityTest]
@@ -145,7 +166,9 @@ namespace SecondLife.Characters.PlayModeTests
                     $"Resource readout '{readout.text}' must show current and maximum.");
             }
 
-            // Layout settles the frame after a style change, so measure after a yield.
+            // Layout settles the frame after a style change, so measure after the style
+            // pass and the layout pass, not in the frame the tree was built.
+            yield return null;
             yield return null;
 
             var bars = root.Query<VisualElement>(name: "resource-bar").ToList();
@@ -185,7 +208,7 @@ namespace SecondLife.Characters.PlayModeTests
         }
 
         [UnityTest]
-        public IEnumerator StatusScreen_PanelKeepsItsHeightAcrossTabs()
+        public IEnumerator StatusScreen_FrameFillsTheViewportAndKeepsItsHeight()
         {
             yield return LoadScene();
 
@@ -195,29 +218,27 @@ namespace SecondLife.Characters.PlayModeTests
             var document = screen.GetComponent<UIDocument>();
             var frame = AssertElement(document, "status-frame");
 
-            // Layout settles on the frame after a style change, so each reading is
-            // taken once after a yield rather than in the same frame as the click.
+            // Two frames: one for the style pass, one for layout. The old single yield
+            // was enough with a tab strip in the tree and is not reliable without one.
             yield return null;
-            var attributesHeight = frame.resolvedStyle.height;
-            Assert.That(attributesHeight, Is.GreaterThan(0f),
+            yield return null;
+
+            var height = frame.resolvedStyle.height;
+            Assert.That(height, Is.GreaterThan(0f),
                 "The status frame resolved to zero height. Layout has not run yet.");
 
-            var skillsTab = AssertButton(document, "status-tab-skills");
-            InvokeHandlers(skillsTab);
-            yield return null;
+            // Removing the tab page wrapper changed the frame's flex chain, so this
+            // guards the invariant that replaced the tab-height test: the frame still
+            // fills the viewport instead of collapsing to its content.
+            var viewportHeight = document.rootVisualElement.resolvedStyle.height;
+            Assert.That(height, Is.GreaterThan(viewportHeight * 0.5f),
+                $"The status frame is only {height:F1}px tall in a {viewportHeight:F1}px viewport. " +
+                "It is sizing to its content rather than filling the screen.");
 
-            var skillsHeight = frame.resolvedStyle.height;
-
-            Assert.That(skillsHeight, Is.EqualTo(attributesHeight).Within(0.5f),
-                "The panel resized when switching tabs. A short tab must not shrink the frame, " +
-                "or the tab strip moves under the pointer between clicks.");
-
-            var attributesTab = AssertButton(document, "status-tab-attributes");
-            InvokeHandlers(attributesTab);
-            yield return null;
-
-            Assert.That(frame.resolvedStyle.height, Is.EqualTo(attributesHeight).Within(0.5f),
-                "The panel did not return to its original height when switching back.");
+            // And the footer must still sit inside the frame, above the nav inset.
+            var footer = AssertElement(document, "status-footer");
+            Assert.That(footer.worldBound.yMax, Is.LessThanOrEqualTo(frame.worldBound.yMax + 1f),
+                "The footer is outside the frame after the tab strip was removed.");
         }
 
         [UnityTest]
@@ -258,16 +279,17 @@ namespace SecondLife.Characters.PlayModeTests
 
         static IEnumerator LoadScene()
         {
-            if (SceneManager.GetActiveScene().name != SceneName)
-            {
-                var load = SceneManager.LoadSceneAsync(SceneName, LoadSceneMode.Single);
-                if (load != null)
-                    yield return load;
+            // Always reload, even when this scene is already active. Tests share the
+            // scene object and the router's current screen, so a test that switches to
+            // skills or narrative would otherwise leave the next test starting on the
+            // wrong screen. Reloading costs a frame or two and buys real isolation.
+            var load = SceneManager.LoadSceneAsync(SceneName, LoadSceneMode.Single);
+            if (load != null)
+                yield return load;
 
-                // One extra frame so every OnEnable and Start on the loaded objects
-                // has run before the test queries the tree.
-                yield return null;
-            }
+            // One extra frame so every OnEnable and Start on the loaded objects
+            // has run before the test queries the tree.
+            yield return null;
 
             // A presentation component may still be waiting on its document. Frame
             // budget rather than a fixed delay, so a fast machine is not slowed and
@@ -303,9 +325,14 @@ namespace SecondLife.Characters.PlayModeTests
 
         static UIDocument FindNarrativeDocument()
         {
+            return FindDocument("Narrative Validation");
+        }
+
+        static UIDocument FindDocument(string objectName)
+        {
             foreach (var candidate in Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None))
             {
-                if (candidate.gameObject.name == "Narrative Validation")
+                if (candidate.gameObject.name == objectName)
                     return candidate;
             }
 

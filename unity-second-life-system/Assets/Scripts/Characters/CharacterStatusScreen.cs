@@ -44,10 +44,6 @@ namespace SecondLife.Characters
         StatusAttributesBinder _attributes;
         StatusAssessmentBinder _assessment;
 
-        Button _attributesTab;
-        Button _skillsTab;
-        VisualElement _attributesPage;
-        VisualElement _skillsPage;
         bool _started;
         bool _bound;
 
@@ -171,27 +167,14 @@ namespace SecondLife.Characters
                 return;
             }
 
-            if (!CacheTabs(root))
-            {
-                enabled = false;
-                return;
-            }
-
             _state.Changed += Refresh;
             _bound = true;
 
             Refresh();
-            ShowPage(Page.Attributes);
         }
 
         void Unbind()
         {
-            if (_attributesTab != null)
-                _attributesTab.clicked -= ShowAttributes;
-
-            if (_skillsTab != null)
-                _skillsTab.clicked -= ShowSkills;
-
             if (_bound && _state != null)
                 _state.Changed -= Refresh;
 
@@ -203,62 +186,6 @@ namespace SecondLife.Characters
             _summary = null;
             _attributes = null;
             _assessment = null;
-            _attributesTab = null;
-            _skillsTab = null;
-            _attributesPage = null;
-            _skillsPage = null;
-        }
-
-        bool CacheTabs(VisualElement root)
-        {
-            _attributesTab = root.Q<Button>("status-tab-attributes");
-            _skillsTab = root.Q<Button>("status-tab-skills");
-            _attributesPage = root.Q<VisualElement>("status-page-attributes");
-            _skillsPage = root.Q<VisualElement>("status-page-skills");
-
-            if (_attributesTab == null || _skillsTab == null || _attributesPage == null || _skillsPage == null)
-            {
-                Debug.LogError(
-                    $"{nameof(CharacterStatusScreen)} on '{name}' could not find the tab strip. Expected " +
-                    "status-tab-attributes, status-tab-skills, status-page-attributes, status-page-skills.",
-                    this);
-                return false;
-            }
-
-            _attributesTab.clicked += ShowAttributes;
-            _skillsTab.clicked += ShowSkills;
-            return true;
-        }
-
-        void ShowAttributes()
-        {
-            ShowPage(Page.Attributes);
-        }
-
-        void ShowSkills()
-        {
-            ShowPage(Page.Skills);
-        }
-
-        void ShowPage(Page page)
-        {
-            var showAttributes = page == Page.Attributes;
-
-            SetVisible(_attributesPage, showAttributes);
-            SetVisible(_skillsPage, !showAttributes);
-
-            SetActive(_attributesTab, showAttributes);
-            SetActive(_skillsTab, !showAttributes);
-        }
-
-        static void SetVisible(VisualElement element, bool visible)
-        {
-            element.EnableInClassList("status-page--hidden", !visible);
-        }
-
-        static void SetActive(Button tab, bool active)
-        {
-            tab.EnableInClassList("status-tab--active", active);
         }
 
         void Refresh()
@@ -275,12 +202,6 @@ namespace SecondLife.Characters
                     this);
                 enabled = false;
             }
-        }
-
-        enum Page
-        {
-            Attributes,
-            Skills
         }
     }
 }

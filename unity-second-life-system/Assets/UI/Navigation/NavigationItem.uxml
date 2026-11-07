@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <!-- One destination in a group flyout. The label is set by the controller
+         because it is authored data, and the button is disabled when the router
+         has no screen for it. -->
+    <ui:Button name="nav-item" class="nav-item" text="Destination" />
+</ui:UXML>

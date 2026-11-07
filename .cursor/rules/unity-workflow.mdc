@@ -51,6 +51,20 @@ When an existing violation is found, the plan states whether it is in scope for 
 
 If a fix would cross into out-of-scope work, say so and propose it separately rather than expanding the change.
 
+### Commit requests
+
+The user opens these with "sync docs, then commit this window's work". Sync the documentation first, then commit only what this chat window produced.
+
+Two repositories are involved and they are separate: the Unity project, and the docs root named in `AGENTS.md`. Either can hold a valid commit, or neither.
+
+- Split by topic, not by file. Two unrelated concerns from one window are two commits, even when they touch adjacent files.
+- A repo with nothing worth recording gets no commit. Never invent one to keep the two repos symmetrical.
+- Work that was already uncommitted when the window started is not part of this window. Leave it in the working tree. When it sits in the same file, or the same hunk, stage only this window's change and restore the rest.
+- One commit per repo needs no approval, whichever repo it is. Commit both and report.
+- More than one commit in the same repo: commit the first, stop, and let the user check it before the next.
+- State the proposed split, with the repo, topic, and files of each commit, before committing anything. Grouping is cheapest to correct before the first commit lands.
+- Order docs first when the documentation is the authority for the change, and code first when the code forces the documentation update.
+
 ## 4. Implementation process
 
 Implement one coherent part at a time, and extend the owner named in `TECHNICAL_DESIGN.md`.

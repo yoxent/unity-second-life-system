@@ -556,12 +556,11 @@ namespace SecondLife.Characters.Tests
                 "assessment-capability-grade",
                 "assessment-guild-rank",
                 "assessment-titles",
-                // Tab strip
-                "status-tab-attributes",
-                "status-tab-skills",
-                "status-page-attributes",
-                "status-page-skills",
-                // Full-bleed regions
+                // Full-bleed regions. The tab strip is gone: Skills became a
+                // navigation destination, so status-tab-attributes,
+                // status-tab-skills, status-page-attributes and status-page-skills
+                // are deliberately absent and must not be re-added here.
+                "status-body",
                 "status-header",
                 "status-content",
                 "status-footer",

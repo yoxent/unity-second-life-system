@@ -7,6 +7,9 @@
     --control-disabled: rgb(206, 199, 184);
 
     --gap-edge: 24px;
+
+    /* Comes from ValidationTheme.tss so it stays tied to the bar's height. */
+    --nav-inset: var(--nav-inset-narrow);
 }
 
 /*
@@ -21,7 +24,13 @@
     flex-grow: 1;
     flex-direction: column;
     background-color: var(--paper);
-    padding: var(--gap-edge);
+
+    /* Top and sides only. The bottom reserves the navigation bar's height so the
+       action buttons are never covered by it. */
+    padding-left: var(--gap-edge);
+    padding-right: var(--gap-edge);
+    padding-top: var(--gap-edge);
+    padding-bottom: var(--nav-inset);
 }
 
 /*
@@ -40,7 +49,11 @@
     font-size: 30px;
     color: var(--ink);
     white-space: normal;
-    line-height: 1.4;
+
+    /* USS has no line-height; it was here for a long time and was silently
+       ignored. -unity-paragraph-spacing is the supported way to open up a block
+       of wrapped text, and it is in pixels rather than a multiplier. */
+    -unity-paragraph-spacing: 6px;
 }
 
 .narrative-choices {
@@ -76,6 +89,23 @@
 .narrative-action:disabled,
 .narrative-choice:disabled {
     background-color: var(--control-disabled);
+}
+
+/*
+ * Keyboard and gamepad focus.
+ *
+ * The narrative buttons are the most-pressed targets in the game, so an invisible
+ * focus cursor here is the worst place for one: a controller player would have no
+ * idea which option they were about to take. A 3px inset left bar is used instead
+ * of a full outline so the button's flat shape stays intact.
+ */
+.narrative-action:focus,
+.narrative-choice:focus {
+    border-left-width: 3px;
+    border-left-color: rgb(31, 26, 20);
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
 }
 
 .narrative-status {
