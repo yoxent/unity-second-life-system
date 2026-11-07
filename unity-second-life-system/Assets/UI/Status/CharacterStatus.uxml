@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Status/CharacterStatus.uss?fileID=7433441132597879392&amp;guid=bd4692f221fe0f44889b9d558114a570&amp;type=3#CharacterStatus" />
+    <ui:VisualElement name="status-root" class="status-root">
+        <ui:VisualElement name="status-frame" class="status-frame">
+            <ui:Label name="status-heading" class="status-heading" text="STATUS" />
+
+            <ui:VisualElement name="status-identity" class="status-identity">
+                <ui:VisualElement name="identity-portrait-host" class="identity-portrait-host" />
+
+                <ui:VisualElement name="identity-details" class="identity-details">
+                    <ui:Label name="character-name" class="character-name" />
+
+                    <ui:VisualElement name="identity-meta" class="identity-meta">
+                        <ui:VisualElement name="identity-species-row" class="identity-meta-item">
+                            <ui:Label name="identity-species-caption" class="status-caption" text="Species" />
+                            <ui:Label name="identity-species" class="identity-meta-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="identity-gender-row" class="identity-meta-item">
+                            <ui:Label name="identity-gender-caption" class="status-caption" text="Gender" />
+                            <ui:Label name="identity-gender" class="identity-meta-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="identity-discipline-row" class="identity-meta-item">
+                            <ui:Label name="identity-discipline-caption" class="status-caption" text="Public discipline" />
+                            <ui:Label name="identity-public-discipline" class="identity-meta-value" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:Label name="identity-description" class="identity-description" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="status-tabs" class="status-tabs">
+                <ui:Button name="status-tab-attributes" class="status-tab status-tab--active" text="Attributes" />
+                <ui:Button name="status-tab-skills" class="status-tab" text="Skills" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="status-page-attributes" class="status-page">
+                <ui:VisualElement name="status-body" class="status-body">
+                    <ui:VisualElement name="status-attributes" class="status-column status-attributes">
+                        <ui:Label name="attributes-heading" class="status-section-heading" text="Attributes" />
+
+                        <ui:VisualElement name="attribute-row-strength" class="attribute-row">
+                            <ui:Label name="attribute-label-str" class="attribute-label" text="STR" />
+                            <ui:Label name="attribute-strength" class="attribute-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="attribute-row-vitality" class="attribute-row">
+                            <ui:Label name="attribute-label-vit" class="attribute-label" text="VIT" />
+                            <ui:Label name="attribute-vitality" class="attribute-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="attribute-row-agility" class="attribute-row">
+                            <ui:Label name="attribute-label-agi" class="attribute-label" text="AGI" />
+                            <ui:Label name="attribute-agility" class="attribute-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="attribute-row-dexterity" class="attribute-row">
+                            <ui:Label name="attribute-label-dex" class="attribute-label" text="DEX" />
+                            <ui:Label name="attribute-dexterity" class="attribute-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="attribute-row-intelligence" class="attribute-row">
+                            <ui:Label name="attribute-label-int" class="attribute-label" text="INT" />
+                            <ui:Label name="attribute-intelligence" class="attribute-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="attribute-row-wisdom" class="attribute-row">
+                            <ui:Label name="attribute-label-wis" class="attribute-label" text="WIS" />
+                            <ui:Label name="attribute-wisdom" class="attribute-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="attribute-row-spirit" class="attribute-row">
+                            <ui:Label name="attribute-label-spi" class="attribute-label" text="SPI" />
+                            <ui:Label name="attribute-spirit" class="attribute-value" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement name="status-derived" class="status-column status-derived">
+                        <ui:Label name="derived-heading" class="status-section-heading" text="Derived" />
+
+                        <ui:VisualElement name="derived-row-max-health" class="derived-row">
+                            <ui:Label name="derived-label-max-health" class="derived-label" text="Max HP" />
+                            <ui:Label name="derived-max-health" class="derived-value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="derived-row-max-mana" class="derived-row">
+                            <ui:Label name="derived-label-max-mana" class="derived-label" text="Mana capacity" />
+                            <ui:Label name="derived-max-mana" class="derived-value" />
+                        </ui:VisualElement>
+
+                        <ui:Label name="derived-footnote" class="status-footnote" text="Shown as the System presents them. The world does not measure people this way." />
+
+                        <ui:VisualElement name="status-assessment" class="status-assessment">
+                            <ui:Label name="assessment-heading" class="status-section-heading" text="Assessment" />
+
+                            <ui:VisualElement name="assessment-row-capability-grade" class="assessment-row">
+                                <ui:Label name="assessment-label-capability-grade" class="assessment-label" text="Capability grade" />
+                                <ui:Label name="assessment-capability-grade" class="assessment-value" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="assessment-row-guild-rank" class="assessment-row">
+                                <ui:Label name="assessment-label-guild-rank" class="assessment-label" text="Guild rank" />
+                                <ui:Label name="assessment-guild-rank" class="assessment-value" />
+                            </ui:VisualElement>
+
+                            <ui:Label name="assessment-label-titles" class="assessment-label assessment-label--titles" text="Titles" />
+                            <ui:VisualElement name="assessment-titles" class="status-titles" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="status-page-skills" class="status-page status-page--hidden">
+                <ui:Label name="skills-heading" class="status-section-heading" text="Skills" />
+                <ui:Label name="skills-empty" class="status-footnote" text="No skills are recorded yet. A skill is learned when its learning process is complete, and the System has no skill list to show until one is learned." />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

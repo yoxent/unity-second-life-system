@@ -107,6 +107,38 @@ EXTERNAL record_choice(choice_id)
             Assert.That(session.ReadVariable("validation_marker"), Is.EqualTo(1));
         }
 
+        [Test]
+        public void ScreenUxml_DefinesEveryElementThePresenterQueries()
+        {
+            var path = Path.Combine(Application.dataPath, "UI", "Narrative", "ValidationScreen.uxml");
+            var uxml = File.ReadAllText(path);
+
+            var expected = new[]
+            {
+                "narrative-body",
+                "narrative-status",
+                "narrative-choices",
+                "narrative-save",
+                "narrative-load"
+            };
+
+            foreach (var elementName in expected)
+            {
+                Assert.That(uxml, Does.Contain($"name=\"{elementName}\""),
+                    $"NarrativeValidationScreen queries '{elementName}', which the authored UXML must define.");
+            }
+        }
+
+        [Test]
+        public void ChoiceTemplate_DefinesTheButtonThePresenterQueries()
+        {
+            var path = Path.Combine(Application.dataPath, "UI", "Narrative", "ValidationChoice.uxml");
+            var uxml = File.ReadAllText(path);
+
+            Assert.That(uxml, Does.Contain("name=\"narrative-choice\""),
+                "NarrativeValidationScreen instantiates the choice template and queries 'narrative-choice'.");
+        }
+
         static void Choose(NarrativeSession session, string text)
         {
             var choice = session.CurrentChoices.Single(candidate => candidate.Text == text);

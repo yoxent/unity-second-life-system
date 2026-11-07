@@ -1,26 +1,29 @@
+:root {
+    --paper: rgb(245, 240, 230);
+    --ink: rgb(31, 26, 20);
+    --control: rgb(219, 209, 189);
+    --control-hover: rgb(232, 223, 205);
+    --control-active: rgb(197, 185, 162);
+    --control-disabled: rgb(206, 199, 184);
+}
+
 .narrative-root {
     flex-grow: 1;
-    padding-left: 80px;
-    padding-right: 80px;
-    padding-top: 80px;
-    padding-bottom: 80px;
+    padding: 80px;
 }
 
 .narrative-panel {
     flex-grow: 1;
     flex-direction: column;
-    background-color: rgb(245, 240, 230);
-    padding-left: 32px;
-    padding-right: 32px;
-    padding-top: 32px;
-    padding-bottom: 32px;
+    background-color: var(--paper);
+    padding: 32px;
 }
 
 .narrative-body {
     flex-grow: 1;
     min-height: 240px;
     font-size: 32px;
-    color: rgb(31, 26, 20);
+    color: var(--ink);
     white-space: normal;
 }
 
@@ -28,7 +31,7 @@
     min-height: 48px;
     margin-top: 16px;
     font-size: 24px;
-    color: rgb(31, 26, 20);
+    color: var(--ink);
     white-space: normal;
 }
 
@@ -43,12 +46,37 @@
     margin-top: 16px;
 }
 
-.narrative-action {
-    flex-grow: 1;
+/*
+ * Shared control surface. The transition lives on the base rule, not on :hover,
+ * so the colour animates back out as well as in.
+ */
+.narrative-action,
+.narrative-choice {
     height: 52px;
     font-size: 24px;
-    background-color: rgb(219, 209, 189);
-    color: rgb(31, 26, 20);
+    color: var(--ink);
+    background-color: var(--control);
+    transition-property: background-color;
+    transition-duration: 0.12s;
+}
+
+.narrative-action:hover,
+.narrative-choice:hover {
+    background-color: var(--control-hover);
+}
+
+.narrative-action:active,
+.narrative-choice:active {
+    background-color: var(--control-active);
+}
+
+.narrative-action:disabled,
+.narrative-choice:disabled {
+    background-color: var(--control-disabled);
+}
+
+.narrative-action {
+    flex-grow: 1;
 }
 
 .narrative-action--load {
@@ -56,9 +84,5 @@
 }
 
 .narrative-choice {
-    height: 52px;
     margin-bottom: 8px;
-    font-size: 24px;
-    background-color: rgb(219, 209, 189);
-    color: rgb(31, 26, 20);
 }

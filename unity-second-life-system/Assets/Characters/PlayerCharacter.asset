@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d91b90f4d17277940bf1bfb9c054316a, type: 3}
+  m_Name: PlayerCharacter
+  m_EditorClassIdentifier: SecondLife.Characters::SecondLife.Characters.CharacterProfile
+  identity:
+    displayName: Ren
+    species: Human
+    gender: 
+    publicDiscipline: 
+    portrait: {fileID: 0}
+    description: Reincarnated into an ordinary provincial family. Keeps the memories
+      and habits of his previous life, and with them a System nobody else can see.
+  attributes:
+    strength: 12
+    vitality: 14
+    agility: 13
+    dexterity: 15
+    intelligence: 17
+    wisdom: 16
+    spirit: 18
+  scaling: {fileID: 11400000, guid: f4d325909c24b694f8faf9489412b999, type: 2}
+  capabilityGrade: 0
+  guildRank: 
+  titles: []

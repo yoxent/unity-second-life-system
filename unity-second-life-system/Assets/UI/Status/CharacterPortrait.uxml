@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="portrait-frame" class="portrait-frame">
+        <ui:VisualElement name="portrait-image" class="portrait-image" />
+        <ui:Label name="portrait-placeholder" class="portrait-placeholder" text="—" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Ink.UnityIntegration;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -8,6 +10,11 @@ namespace SecondLife.Narrative
     /// Drives the narrative validation screen. Layout and styling are authored in
     /// ValidationScreen.uxml and ValidationScreen.uss; this class only queries
     /// elements, handles interaction, and updates displayed data.
+    ///
+    /// <see cref="UIDocument"/> clears its tree on disable and rebuilds it on
+    /// enable, so the query and the button handlers are paired with those
+    /// callbacks. Handlers registered only in Start would never come back after a
+    /// toggle.
     /// </summary>
     public sealed class NarrativeValidationScreen : MonoBehaviour
     {
@@ -23,31 +30,47 @@ namespace SecondLife.Narrative
 
         NarrativeSession _session;
         string _snapshot;
+        string _bodyText = string.Empty;
         Label _body;
         Label _status;
         VisualElement _choices;
         Button _save;
         Button _load;
 
-        void Start()
+        // One handler per instantiated choice button, so each can be detached when
+        // the row is thrown away. A lambda that is never removed keeps the whole
+        // controller alive through the button.
+        readonly List<Action> _choiceHandlers = new List<Action>();
+        readonly List<Button> _choiceButtons = new List<Button>();
+        bool _started;
+        bool _bound;
+        bool _hasAdvanced;
+
+        void Awake()
         {
             if (!ValidateReferences())
-            {
                 enabled = false;
-                return;
-            }
+        }
 
-            CacheElements();
+        void Start()
+        {
+            // Start, not OnEnable: UIDocument builds its tree in its own OnEnable,
+            // and component order on one GameObject is not guaranteed.
+            _started = true;
+            Bind();
+        }
 
-            if (!inkFile.isCompiled)
-            {
-                Show("Validation story is not compiled. Import the ink file in the Unity Editor.", "No choice recorded.");
-                return;
-            }
+        void OnEnable()
+        {
+            // Fires before Start on the first enable, so only a later re-enable
+            // rebinds here.
+            if (_started)
+                Bind();
+        }
 
-            var state = new NarrativeChoiceState { HelpAvailable = helpAvailable };
-            _session = new NarrativeSession(inkFile.storyJson, state);
-            Refresh(replaceBody: true);
+        void OnDisable()
+        {
+            Unbind();
         }
 
         bool ValidateReferences()
@@ -76,12 +99,70 @@ namespace SecondLife.Narrative
                 return false;
             }
 
+            if (choiceTemplate == null)
+            {
+                Debug.LogError(
+                    $"{nameof(NarrativeValidationScreen)} on '{name}' has no Choice Template assigned. Assign ValidationChoice.uxml in the inspector.",
+                    this);
+                return false;
+            }
+
             return true;
         }
 
-        void CacheElements()
+        void Bind()
+        {
+            if (_bound)
+                return;
+
+            if (!CacheElements())
+            {
+                enabled = false;
+                return;
+            }
+
+            _save.clicked += Save;
+            _load.clicked += Load;
+            _bound = true;
+
+            if (_session == null)
+                StartSession();
+
+            // The story is a consuming cursor, so a rebind restores what was
+            // already read instead of advancing it a second time.
+            var firstBind = !_hasAdvanced;
+            Refresh(replaceBody: firstBind);
+        }
+
+        void Unbind()
+        {
+            if (_save != null)
+                _save.clicked -= Save;
+
+            if (_load != null)
+                _load.clicked -= Load;
+
+            ClearChoiceRows();
+            _bound = false;
+
+            _body = null;
+            _status = null;
+            _choices = null;
+            _save = null;
+            _load = null;
+        }
+
+        bool CacheElements()
         {
             var root = document.rootVisualElement;
+            if (root == null)
+            {
+                Debug.LogError(
+                    $"{nameof(NarrativeValidationScreen)} on '{name}' found no visual tree on its UIDocument.",
+                    this);
+                return false;
+            }
+
             _body = root.Q<Label>("narrative-body");
             _status = root.Q<Label>("narrative-status");
             _choices = root.Q<VisualElement>("narrative-choices");
@@ -94,60 +175,97 @@ namespace SecondLife.Narrative
                     $"{nameof(NarrativeValidationScreen)} on '{name}' could not find all required elements in the UXML. " +
                     "Expected narrative-body, narrative-status, narrative-choices, narrative-save, narrative-load.",
                     this);
-                enabled = false;
-                return;
+                return false;
             }
 
-            _save.clicked += Save;
-            _load.clicked += Load;
+            return true;
         }
 
-        void OnDisable()
+        void StartSession()
         {
-            if (_save != null)
-                _save.clicked -= Save;
+            if (!inkFile.isCompiled)
+                return;
 
-            if (_load != null)
-                _load.clicked -= Load;
+            var state = new NarrativeChoiceState { HelpAvailable = helpAvailable };
+            _session = new NarrativeSession(inkFile.storyJson, state);
         }
 
         void Refresh(bool replaceBody)
         {
+            if (_session == null)
+            {
+                _bodyText = inkFile.isCompiled
+                    ? string.Empty
+                    : "Validation story is not compiled. Import the ink file in the Unity Editor.";
+                _body.text = _bodyText;
+                _status.text = "No choice recorded.";
+                ClearChoiceRows();
+                return;
+            }
+
             if (replaceBody)
             {
                 var lines = _session.Advance();
                 if (lines.Count > 0)
-                    _body.text = string.Join("\n", lines);
+                    _bodyText = string.Join("\n", lines);
+
+                _hasAdvanced = true;
             }
 
+            _body.text = _bodyText;
             RebuildChoices();
             _status.text = Status();
         }
 
         void RebuildChoices()
         {
-            _choices.Clear();
+            ClearChoiceRows();
+
             if (_session == null)
                 return;
 
             foreach (var choice in _session.CurrentChoices)
             {
+                var button = choiceTemplate.Instantiate().Q<Button>("narrative-choice");
+                if (button == null)
+                {
+                    Debug.LogError(
+                        $"{nameof(NarrativeValidationScreen)} on '{name}' cannot use Choice Template " +
+                        $"'{choiceTemplate.name}': it has no Button named narrative-choice.",
+                        this);
+                    enabled = false;
+                    return;
+                }
+
+                button.text = choice.Text;
+
+                // Capture the index, not the button. A VisualElement is recycled
+                // presentation, never an identity.
                 var index = choice.Index;
-                var button = CreateChoiceButton(choice.Text);
-                button.clicked += () =>
+                Action handler = () =>
                 {
                     _session.Choose(index);
                     Refresh(replaceBody: true);
                 };
+
+                button.clicked += handler;
+                _choiceButtons.Add(button);
+                _choiceHandlers.Add(handler);
                 _choices.Add(button);
             }
         }
 
-        Button CreateChoiceButton(string label)
+        void ClearChoiceRows()
         {
-            var button = choiceTemplate.Instantiate().Q<Button>("narrative-choice");
-            button.text = label;
-            return button;
+            for (var i = 0; i < _choiceButtons.Count; i++)
+            {
+                if (_choiceButtons[i] != null)
+                    _choiceButtons[i].clicked -= _choiceHandlers[i];
+            }
+
+            _choiceButtons.Clear();
+            _choiceHandlers.Clear();
+            _choices?.Clear();
         }
 
         string Status()
@@ -186,14 +304,8 @@ namespace SecondLife.Narrative
                 return;
             }
 
-            _body.text = "Restored the saved validation state.";
+            _bodyText = "Restored the saved validation state.";
             Refresh(replaceBody: false);
-        }
-
-        void Show(string body, string status)
-        {
-            _body.text = body;
-            _status.text = status;
         }
     }
 }
