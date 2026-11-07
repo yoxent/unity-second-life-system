@@ -60,8 +60,8 @@ Two repositories are involved and they are separate: the Unity project, and the 
 - Split by topic, not by file. Two unrelated concerns from one window are two commits, even when they touch adjacent files.
 - A repo with nothing worth recording gets no commit. Never invent one to keep the two repos symmetrical.
 - Work that was already uncommitted when the window started is not part of this window. Leave it in the working tree. When it sits in the same file, or the same hunk, stage only this window's change and restore the rest.
-- One commit per repo needs no approval, whichever repo it is. Commit both and report.
-- More than one commit in the same repo: commit the first, stop, and let the user check it before the next.
+- **Every commit is asked for, including the first one in a repo.** Finishing an edit is not permission to commit it. "Sync it now", "write these", "fix that" and "add a note to the file" are instructions to change files, not to commit. Ask, name the proposed split, and wait.
+- A request to commit covers the commit the user is looking at. It is not standing permission for the commits that follow. After each commit, stop and let the user ask for the next one.
 - State the proposed split, with the repo, topic, and files of each commit, before committing anything. Grouping is cheapest to correct before the first commit lands.
 - Order docs first when the documentation is the authority for the change, and code first when the code forces the documentation update.
 
