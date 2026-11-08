@@ -1,21 +1,21 @@
 ---
-description: Mandatory process for all Unity work. Inspect the implementation, plan before editing, stay in scope, implement, test, and report honestly.
+description: Mandatory process for all Unity work. Inspect the implementation, plan before editing, stay in scope, implement, test, report honestly.
 alwaysApply: true
 ---
 
 # Unity workflow
 
-Applies to every Unity task in this project, from a gameplay rule to a one-line fix. Unity standards are in `unity-core.mdc`. UI Toolkit specifics are in `unity-ui-toolkit.mdc`; read that file whenever a task involves UI.
+Applies to every Unity task, from a gameplay rule to a one-line fix. Standards are `unity-core.mdc`. UI specifics are `unity-ui-toolkit.mdc`; read it whenever a task involves UI.
 
-These are mandatory project standards, not recommendations.
+Mandatory standards, not recommendations.
 
-The depth scales with the change. A substantial feature gets the full pass. A one-line fix with an obvious site takes the same steps quickly and still reports honestly. None of the steps is skipped silently.
+Depth scales with the change. A substantial feature gets the full pass. A one-line fix with an obvious site runs the same steps quickly and still reports honestly. No step is skipped silently.
 
 ## 1. Project inspection
 
-Read, before proposing a change:
+Read before proposing a change:
 
-- `PROJECT_CONTEXT.md` for the current project state.
+- `PROJECT_CONTEXT.md` for current state.
 - `GDD.md` when the task affects gameplay or game design.
 - `TECHNICAL_DESIGN.md` when it affects a boundary or system ownership.
 - The feature spec in `FEATURE_SPECS\` when that feature has one.
@@ -26,100 +26,53 @@ Inspect the existing implementation before proposing a new type. Read the actual
 
 Confirmed Notion text is design intent. Provisional and open text is not a requirement. A Notion recommendation is not adopted until it is recorded in the repo technical design or a decision file.
 
-If a missing decision would change the result, post it on the Notion AI to AI page and stop. Do not wait in the same session for the answer, and do not invent it.
+If a missing decision would change the result, post it on the Notion AI to AI page and stop. Do not wait in the same session for the answer. Do not invent it.
 
 ## 2. Planning before implementation
 
 Name the files, the owner each change extends, the risks, and the tests. Do this before editing.
 
-A plan for a UI task also names the UXML, USS, prefab, `PanelSettings`, and inspector assignments the change requires. Those are deliverables, not follow-up setup.
+A UI plan also names the UXML, USS, prefab, `PanelSettings`, and inspector assignments the change requires. Those are deliverables, not follow-up setup.
 
-A large feature, or a missing decision that would change the result, stops here. Post the implementation plan and the acceptance criteria. Do not edit code, scenes, or assets until the user agrees.
+A large feature, or a missing decision that would change the result, stops here. Post the implementation plan and acceptance criteria. Do not edit code, scenes, or assets until the user agrees.
 
 When an existing violation is found, the plan states whether it is in scope for migration and, if not, records it as technical debt with the affected components named. See `unity-core.mdc` section 2.
 
 ## 3. Scope management
 
-- Work inside the approved scope. A newly discovered unrelated problem is reported, not silently fixed.
-- Stay inside the current `ROADMAP.md` gate. Do not start the next gate until that gate's exit criteria are met.
+- Work inside the approved scope. Report a newly discovered unrelated problem; do not silently fix it.
+- Stay inside the current `ROADMAP.md` gate. Do not start the next gate until its exit criteria are met.
 - Do not invent a gameplay rule or silently change an approved decision.
 - Do not modify unrelated systems, scenes, or assets without justification.
-- Do not create new work following an outdated convention just to stay consistent with it.
 - Ask for clarification when a missing decision materially affects the implementation.
-- Do not commit or push unless asked. Report the version control state and leave it untouched.
 - Prefer incremental changes over broad rewrites.
 
 If a fix would cross into out-of-scope work, say so and propose it separately rather than expanding the change.
 
-### Commit requests
-
-"Sync docs, then commit this window's work" is a complete instruction. Sync the documentation first, then commit the changes this chat window produced. The window is the scope; do not ask which changes are meant.
-
-Two repositories are involved and they are separate: the Unity project, and the docs root named in `AGENTS.md`. Either can hold a valid commit, or neither.
-
-- **One commit per repo per window.** A window produces at most two commits: one docs commit and one Unity commit. Several topics in one window do not become several commits; they become one commit whose message names each concern in turn. Do not split by topic, and do not split by file.
-- The one remaining split is branch isolation. A window that touches more than one project in the docs repo lands one commit per affected project branch, because those cannot share a commit.
-- A repo with nothing worth recording gets no commit. Never invent one to keep the two repos symmetrical.
-- Work that was already uncommitted when the window started is not part of this window. Leave it in the working tree. When it sits in the same file, or the same hunk, stage only this window's change with partial staging and leave the rest in place. One commit is the target size, not a licence to stage another window's work.
-- **Every commit is asked for.** Finishing an edit is not permission to commit it. "Sync it now", "write these", "fix that" and "add a note to the file" are instructions to change files, not to commit.
-- A commit request covers the commits it names: at most one per repo, both landing under that request. It is not standing permission afterwards. Once they land, stop and let the user ask again.
-- State the repo, the message, and the files of each commit before committing anything. Grouping is cheapest to correct before the first commit lands.
-- Order docs first when the documentation is the authority for the change, and code first when the code forces the documentation update.
-
-### Never revert uncommitted work to exclude it from a commit
-
-**Uncommitted content is newer than committed content.** `HEAD` is not the newest version of a file; the working tree is. So a command that "restores" a file from `HEAD` does not restore anything, it **deletes the newest work and reinstates an older version**. This has already happened once in this project: a working tree carrying a decided, approved reversal was reset to the superseded committed text to make a commit boundary cleaner, and the loss was only caught by luck.
-
-Prohibited for the purpose of excluding a change from a commit:
-
-- `git checkout -- <file>`, `git restore <file>`, `git checkout HEAD -- <file>`.
-- `git reset --hard`, or `git stash` without `pop`, on a file holding work this window must keep.
-- Copying a remembered or earlier-created backup over a working file without first checking what that backup contains.
-
-To stage part of a file, use **partial staging**: `git add -p` and choose hunks, or stage a patched copy and restore the working file from a verified source. To exclude another window's change from a commit, leave it in the working tree and do not stage it. Neither case requires reverting anything.
-
-Before any destructive operation on a file with uncommitted work, run the check and read the output rather than assuming:
-
-```powershell
-git diff -- <file>            # what the working tree has that HEAD does not
-git log -1 --format='%ad %s' --date=iso -- <file>   # how old HEAD's version is
-```
-
-If the diff contains a change someone decided on, it is the newest truth and it stays.
-
-### A backup is only a backup once it is checked
-
-A backup that was taken from an already-modified state is not a backup of the original, and calling it one makes the loss invisible. Before trusting or copying back any backup:
-
-- **Name it for what it contains**, not for what it is meant to be. `TECHNICAL_DESIGN.before-strip.md` says something; `TECHNICAL_DESIGN_full.md` claims completeness without evidence.
-- **Check it holds the specific thing at risk**, by searching the file for an identifiable line from that content, not by file size or timestamp.
-- **Take it before the first destructive step**, not between steps. A backup taken after a modification protects the modified state.
-
-The failure this prevents: a file was backed up while intact, then stripped for a commit, then re-copied over its own backup under a `_full` name, and the next restore used the stripped copy. Every individual step looked like a backup, and the content was gone twice.
+Commit rules, including when a commit is allowed and how uncommitted work is protected, are in `unity-source-control.mdc`.
 
 ## 4. Implementation process
 
 Implement one coherent part at a time, and extend the owner named in `TECHNICAL_DESIGN.md`.
 
 - Follow `unity-core.mdc` and, for UI, `unity-ui-toolkit.mdc`.
-- Author structure in the editor: UXML, USS, prefabs, and serialized references.
-- Configure the scene or prefab references as part of the change. A controller whose references are unassigned is not finished work.
+- Author structure in the editor: UXML, USS, prefabs, serialized references.
+- Configure the scene or prefab references as part of the change. A controller with unassigned references is not finished work.
 - A persistence, recovery, or concurrent-session feature waits until the normal success path has been played and its result has survived a reload.
 - Do not debug the happy path and the failure path in the same change.
 - After editing scripts, check for compilation errors before relying on new types.
 
 ## 5. Testing strategy
 
-Follow `TEST_STRATEGY.md`. The pass conditions are listed in `unity-core.mdc` section 6; this section is how to check them and how to report the result.
+Follow `TEST_STRATEGY.md`. Pass conditions are `unity-core.mdc` section 6; this section is how to check and report them.
 
 - Run the tests that cover the change when they can be run, and report the actual result.
 - A passing EditMode suite is not evidence that a scene flow works. Say which path was not played.
 - Play Mode counts only if it was entered.
-- Serialized wiring is verified by opening the scene or prefab. Name which one was opened.
-- When the change is UI, also run the checks in `unity-ui-toolkit.mdc` section 8.
+- When the change is UI, also run the checks in `unity-ui-toolkit.mdc` section 7.
 - Never claim Unity Play Mode, a build, console cleanliness, or an editor flow unless that run happened.
 
-If a required check cannot be run, say which one and why, and mark the affected claim as unverified rather than omitting it.
+If a required check cannot be run, say which one and why, and mark the affected claim unverified rather than omitting it.
 
 ## 6. Final reporting
 
@@ -129,16 +82,16 @@ Include the compliance status from `unity-core.mdc` section 3 whenever a standar
 
 Change `GDD.md`, `TECHNICAL_DESIGN.md`, `ROADMAP.md`, `PROJECT_CONTEXT.md`, or a feature spec only when this change altered a rule, a boundary, a requirement, or the current state. A new architectural decision goes in `DECISIONS\` and into `TECHNICAL_DESIGN.md`. Do not write a document that only repeats the report.
 
-**A new or amended decision is a change to the current state, even when nothing shipped.** "Only when this change altered a rule" reads as "no" for a window that only wrote design, and that is how `PROJECT_CONTEXT.md` drifted twice in one window: three commits added decision and spec files and never touched it. An approved-but-unbuilt decision is exactly what a reader of the current state needs to know, and a pending inquiry is the same.
+**A new or amended decision is a change to the current state, even when nothing shipped.** "Only when this change altered a rule" reads as "no" for a window that only wrote design, and that is how `PROJECT_CONTEXT.md` drifted twice in one window: three commits added decision and spec files and never touched it. An approved-but-unbuilt decision is exactly what a reader of the current state needs to know. A pending inquiry is the same.
 
-`PROJECT_CONTEXT.md` therefore carries two checkable sections — an **approved, not implemented** list and an **open inquiries** table — and the docs repo enforces them with `Tools/check-context-drift.py`. Run it before calling a commit request done:
+`PROJECT_CONTEXT.md` therefore carries two checkable sections — an **approved, not implemented** list and an **open inquiries** table — enforced by `Tools/check-context-drift.py` in the docs repo. Run it before calling a commit request done:
 
 ```powershell
 cd E:\Projects\Docs\unity-second-life-system
 python Tools/check-context-drift.py
 ```
 
-It fails when a decision marked approved-but-not-implemented is never named in `PROJECT_CONTEXT.md`, or when a spec describes an inquiry as open that the table does not list. It reports the count it detected, so a pass means it actually matched something rather than matching nothing.
+It fails when a decision marked approved-but-not-implemented is never named in `PROJECT_CONTEXT.md`, or when a spec describes an inquiry as open that the table does not list. It reports the count it detected, so a pass means it matched something rather than nothing.
 
 When an inquiry is answered and closed, remove its row and record the outcome under the entry it changed. Do not leave closed rows in the table.
 

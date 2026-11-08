@@ -8,49 +8,29 @@ alwaysApply: false
 
 Applies whenever a task involves UI Toolkit: authoring or editing UXML and USS, a `UIDocument`, a screen controller, or presenting data to the player.
 
-Read `unity-core.mdc` first. It carries the mandatory project standards, asset references, and compliance statuses. This file adds only UI-specific rules and does not restate them.
+Read `unity-core.mdc` first. It carries the mandatory standards, asset references, and compliance statuses. This file adds only UI-specific rules and does not restate them.
 
 If no file in the task matches the globs but the task still involves UI, follow this file anyway.
 
-## 1. UXML and USS authoring
+## 1. Authored structure, not C#
 
-This is the UI-specific half of `unity-core.mdc` principle 3: C# does not replace authored structure.
+This is the UI half of `unity-core.mdc` principle 3. All predefined UI structure is authored in UXML and all visual styling in USS — layout, spacing, colours, fonts, states, themes.
 
-- All predefined UI structure is authored in UXML.
-- All visual styling is authored in USS: layout, spacing, colours, fonts, states, and themes.
 - Prefer USS classes over inline styles. A data-driven inline value, such as a progress bar width, is acceptable.
 - Give every element that C# queries a `name` attribute in the UXML.
 - Name USS classes by role, not by appearance.
 - Keep gameplay rules out of UXML, USS, and controllers.
-- C# is for querying elements, registering and handling events, updating data, managing UI state, communicating with game systems, and instantiating templates.
 
-## 2. UI Builder workflow
+C# is for querying elements, registering and handling events, updating data, managing UI state, communicating with game systems, and instantiating templates.
 
-Use Unity UI Builder as the preferred tool for creating and editing UXML and USS.
+Prohibited for predefined structure:
 
-- Author or edit the screen in UI Builder, then wire behaviour in C#.
-- Do not hand-write a visual tree in C# and port it later. Author it once, in the editor.
-- Keep UXML and USS in `Assets/UI/`, one folder per screen.
-- Screen assets are part of the deliverable. A controller without its UXML and USS is incomplete work. See `unity-workflow.mdc` section 3.
-
-## 3. Static vs. dynamic UI construction
-
-Decide this before writing code, and record the decision in the plan required by `unity-workflow.mdc` section 2.
-
-C# must not construct static hierarchies. Prohibited:
-
-- `new VisualElement()`, `new Label()`, `new Button()`, or other controls for predefined structure.
+- `new VisualElement()`, `new Label()`, `new Button()`, or other controls.
 - Defining a whole screen in C#.
 - Reproducing an existing UXML structure in runtime code.
 - Extensive visual styling in C# where USS applies.
 
-Runtime element creation is permitted only when the count or structure genuinely depends on runtime data:
-
-- Inventory entries.
-- Dynamic item lists.
-- Dialogue choices.
-- Procedural UI elements.
-- Repeated instances of a reusable UXML template.
+Runtime element creation is permitted only when the count or structure genuinely depends on runtime data: inventory entries, dynamic item lists, dialogue choices, procedural UI elements, repeated instances of a reusable UXML template.
 
 In every permitted case, author the visual structure as a UXML template and instantiate it. Do not hand-build the row and then populate it.
 
@@ -58,11 +38,20 @@ A screen being displayed at runtime does not justify constructing it programmati
 
 - **Static:** fixed elements, labels, panels, fixed actions. Authored in UXML, referenced by name in C#.
 - **Dynamic count:** rows, lists, choices, repeated widgets. The container is authored in UXML; each instance comes from a UXML template.
-- **Dynamic structure:** rare. Still start from an authored UXML base and add only what runtime data requires.
+- **Dynamic structure:** rare. Start from an authored UXML base and add only what runtime data requires.
 
-If a judgement call could go either way, prefer authored. The cost of adding a UXML template is lower than migrating a screen built in code.
+If a judgement call could go either way, prefer authored. Adding a UXML template costs less than migrating a screen built in code.
 
-## 4. UI component architecture
+## 2. UI Builder workflow
+
+Use Unity UI Builder to create and edit UXML and USS.
+
+- Author or edit the screen in UI Builder, then wire behaviour in C#.
+- Do not hand-write a visual tree in C# and port it later. Author it once, in the editor.
+- Keep UXML and USS in `Assets/UI/`, one folder per screen.
+- Screen assets are part of the deliverable. A controller without its UXML and USS is incomplete work. See `unity-workflow.mdc` section 3.
+
+## 3. UI component architecture
 
 | Layer | Owns |
 | --- | --- |
@@ -82,7 +71,7 @@ Screens fill the viewport. This is a reading-heavy, button-driven game: the play
 
 - The root is `flex-grow: 1` with edge padding only. No centred card, no `max-width`, no side margins that waste the interactive area.
 - The frame is a column that fills its parent.
-- Header and footer are fixed and always visible. The content band between them is the only flexible region, so a tab with different content never moves the header or footer.
+- Header and footer are fixed and always visible. The content band between them is the only flexible region, so a tab with different content never moves them.
 - Frequently-read values belong in the header, not behind a tab, because a tab change costs the player a navigation.
 - Button targets are the primary interaction. Give them generous height and a visible hover and pressed state.
 
@@ -90,15 +79,15 @@ The rule and its reasoning are recorded in [DECISIONS/2026-11-07-full-screen-nav
 
 ### Tabbed screens
 
-When a screen swaps between tabs or pages with `display: none`, the frame sizes itself to whichever page is in flow, so a page with less content shrinks the panel and moves the tab strip under the pointer.
+When a screen swaps between tabs or pages with `display: none`, the frame sizes to whichever page is in flow, so a page with less content shrinks the panel and moves the tab strip under the pointer.
 
 A screen whose frame is height-independent does not have this problem: a full-bleed frame with a flexible content band keeps one height whatever a tab contains. Prefer that. When a frame's height still follows its content:
 
 - Give the shared frame `min-height`, not `height`, so a taller page can still grow it.
 - Derive the value from the measured height of the richest page, and name it as a custom property with a comment explaining why.
-- Guard the invariant with a PlayMode test that switches tabs and compares the frame height. Layout values cannot be asserted from EditMode, which never builds a visual tree.
+- Guard the invariant with a PlayMode test that switches tabs and compares frame height. Layout values cannot be asserted from EditMode, which never builds a visual tree.
 
-## 5. UI lifecycle and event handling
+## 4. UI lifecycle and event handling
 
 - `UIDocument` builds its visual tree in its own `OnEnable`. Query in `Start`, not `OnEnable`: component order among scripts on one `GameObject` is not guaranteed, so an `OnEnable` query can see an empty tree.
 - Query once and cache the results. Do not re-query every frame.
@@ -107,14 +96,14 @@ A screen whose frame is height-independent does not have this problem: a full-bl
 - Unsubscribe from `clicked` on instantiated elements when you release them, so pooled or destroyed instances do not keep handlers alive.
 - Null-check a required element after querying. Log an error naming the element and the object, then disable the component. Do not continue silently with a null element.
 
-## 6. Reusable UI components
+## 5. Reusable UI components
 
 - A repeated visual structure becomes a UXML template asset, not a helper method that builds it in code.
 - A composite widget with behaviour gets its own UXML asset and its own controller, with the `VisualTreeAsset` and `StyleSheet` serialized on that controller.
 - Templates are instantiated from a serialized `VisualTreeAsset` reference, never loaded by path. See `unity-core.mdc` section 1.
 - Shared styling lives in a shared USS file, not duplicated inline per screen.
 
-## 7. UI-specific inspector configuration
+## 6. UI-specific inspector configuration
 
 - `UIDocument` gets its `VisualTreeAsset` and `PanelSettings` from the inspector, never from `AddComponent<UIDocument>()` or `ScriptableObject.CreateInstance<PanelSettings>()`.
 - The controller serializes every known UI dependency: `VisualTreeAsset`, template `VisualTreeAsset`, `StyleSheet`, `PanelSettings`, fonts, sprites, and the data assets the screen presents.
@@ -123,9 +112,9 @@ A screen whose frame is height-independent does not have this problem: a full-bl
 
 Serialization rules themselves are in `unity-core.mdc` section 4.
 
-## 8. UI validation
+## 7. UI validation
 
-Run these checks in addition to the standing conditions in `unity-core.mdc` section 6, and report them through `unity-workflow.mdc` section 6.
+Run these in addition to the standing conditions in `unity-core.mdc` section 6, and report them through `unity-workflow.mdc` section 6.
 
 - Static UI is authored in UXML.
 - Styling is authored in USS.
@@ -143,9 +132,9 @@ A UI change is not complete when its C# compiles. Open the scene or prefab and c
 
 ### USS fails quietly, so the console is part of verification
 
-Unity reports an unsupported USS property as a **warning** and drops the declaration. The file still imports, the build still succeeds, and the element renders as if the rule were never written. A mistyped property, a CSS property USS does not implement, or a `calc()` expression therefore looks identical to working CSS until someone measures the pixels.
+Unity reports an unsupported USS property as a **warning** and drops the declaration. The file still imports, the build still succeeds, and the element renders as if the rule were never written. A mistyped property, a CSS property USS does not implement, or a `calc()` expression looks identical to working CSS until someone measures the pixels.
 
-This has already cost this project: `line-height` sat in three stylesheets, silently ignored, and was found only by accident during unrelated work.
+This has already cost this project: `line-height` sat in three stylesheets, silently ignored, found only by accident during unrelated work.
 
 - After editing a stylesheet, read the console filtered to warnings. A clean compile is not evidence the styles were applied.
 - USS has no `calc()`. A sum must be a literal, and shared literals belong in `ValidationTheme.tss` rather than copied per screen.

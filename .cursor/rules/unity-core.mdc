@@ -1,21 +1,19 @@
 ---
-description: Mandatory Unity standards for all Unity work. Serialized asset references, existing violations as migration targets, and documentation is not implementation compliance.
+description: Mandatory Unity standards. Serialized asset references, existing violations as migration targets, documentation is not implementation compliance.
 alwaysApply: true
 ---
 
 # Unity core
 
-Applies to every Unity task in this project. Process is in `unity-workflow.mdc`. UI Toolkit specifics are in `unity-ui-toolkit.mdc`.
+Mandatory standards, not recommendations. Do not choose a different implementation because it is faster to generate in C#.
 
-These are mandatory project standards, not recommendations. Do not choose a different implementation because it is faster to generate in C#.
-
-If a task touches UI at all, read `unity-ui-toolkit.mdc` even when no file matches its globs.
+Process is `unity-workflow.mdc`. UI specifics are `unity-ui-toolkit.mdc` — read it whenever a task touches UI, even when no file matches its globs.
 
 ## 1. Asset references
 
 Every known, predefined dependency is a serialized inspector reference: `VisualTreeAsset`, `StyleSheet`, `PanelSettings`, fonts, sprites and textures, `AudioClip`, `ScriptableObject`, prefab assets, and data assets such as `InkFile`.
 
-A scripted importer's main asset is directly referenceable. `InkFile` is the main asset that `InkImporter` produces for a `.ink` file, so `Resources` is never needed to reach it.
+A scripted importer's main asset is directly referenceable. `InkImporter` produces `InkFile` as the main asset for a `.ink` file, so `Resources` is never needed to reach it.
 
 Prohibited for a known dependency:
 
@@ -35,14 +33,14 @@ Prefabs are referenced, not loaded by path. Spawn from a serialized prefab field
 
 Inspect an existing feature for violations when modifying it. Do not log a violation as a known gap and leave it indefinitely.
 
-- If the feature is in scope, migrate it.
-- If it is out of scope: name the violation, name the affected files and components, state the required migration, and record it as technical debt.
+- In scope: migrate it.
+- Out of scope: name the violation, the affected files and components, and the required migration; record it as technical debt.
 
 Do not copy an outdated convention to stay consistent with it. These standards win unless an exception is approved under section 7.
 
 ## 3. Implementation compliance
 
-Documentation is not compliance. None of these resolve a violation: updating the technical design, recording debt, describing a migration plan, adding source comments or warnings, or documenting intent.
+Documentation is not compliance. None of these resolve a violation: updating the technical design, recording debt, describing a migration plan, adding source comments or warnings, documenting intent.
 
 Order of work:
 
@@ -52,7 +50,7 @@ Order of work:
 4. Update the docs to match the resulting implementation.
 5. Verify against these standards.
 
-If migration is out of scope or cannot be done safely: leave the code unchanged, report that it remains non-compliant, name the exact components, and describe the remaining work. Never describe the violation as resolved and never claim project-wide compliance.
+If migration is out of scope or cannot be done safely: leave the code unchanged, report that it remains non-compliant, name the exact components, and describe the remaining work. Never describe the violation as resolved. Never claim project-wide compliance.
 
 Report exactly one status:
 
@@ -72,7 +70,7 @@ Known dependencies are configurable through serialized references.
 - Private `[SerializeField]` fields by default.
 - Group related references with `[Header]`.
 - Validate required references at initialization.
-- Log a clear error naming the field and the object, then disable the component.
+- On failure: log a clear error naming the field and the object, then disable the component.
 - Preserve references in scenes and prefabs.
 - Never fall back to path-based loading for a missing reference.
 
@@ -82,17 +80,17 @@ Do not serialize internal implementation detail. Expose meaningful dependencies 
 
 | Layer | Owns |
 | --- | --- |
-| Unity assets (scenes, prefabs, UXML, USS, ScriptableObjects) | Static structure, layout, styling, and configured dependencies |
+| Unity assets (scenes, prefabs, UXML, USS, ScriptableObjects) | Static structure, layout, styling, configured dependencies |
 | MonoBehaviour controllers | Initialization, element and reference queries, event handling, presenting data, talking to game systems |
 | Game systems | Rules, data, state, persistence, business logic |
 
 Gameplay logic does not live in a presentation component. A presentation component does not own a rule.
 
-The UI Toolkit layer split is in `unity-ui-toolkit.mdc` section 4.
+The UI Toolkit layer split is in `unity-ui-toolkit.mdc` section 3.
 
 ## 6. Validation requirements
 
-These are the standing conditions for any Unity work. How and when to check them is in `unity-workflow.mdc` section 5.
+Standing conditions for any Unity work. How and when to check them is `unity-workflow.mdc` section 5.
 
 Before work is called complete:
 
